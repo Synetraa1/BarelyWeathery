@@ -1,37 +1,37 @@
 export const getMeteocon = (openWeatherIconCode) => {
     const iconMap = {
         // Clear
-        '01d': '/public/icons/clear-day.svg',
+        '01d': '/icons/clear-day.svg',
         '01n': '/public/icons/clear-night.svg',
 
         // Clouds
-        '02d': '/public/icons/partly-cloudy-day.svg',
-        '02n': '/public/icons/partly-cloudy-night.svg',
-        '03d': '/public/icons/cloudy.svg',
-        '03n': '/public/icons/cloudy.svg',
-        '04d': '/public/icons/overcast-day.svg',
-        '04n': '/public/icons/overcast-night.svg',
+        '02d': '/icons/partly-cloudy-day.svg',
+        '02n': '/icons/partly-cloudy-night.svg',
+        '03d': '/icons/cloudy.svg',
+        '03n': '/icons/cloudy.svg',
+        '04d': '/icons/overcast-day.svg',
+        '04n': '/icons/overcast-night.svg',
 
         // Rain
-        '09d': '/public/icons/rain.svg',
-        '09n': '/public/icons/rain.svg',
-        '10d': '/public/icons/partly-cloudy-day-rain.svg',
-        '10n': '/public/icons/partly-cloudy-night-rain.svg',
+        '09d': '/icons/rain.svg',
+        '09n': '/icons/rain.svg',
+        '10d': '/icons/partly-cloudy-day-rain.svg',
+        '10n': '/icons/partly-cloudy-night-rain.svg',
 
         // Thunderstorm
-        '11d': '/public/icons/thunderstorm-day.svg',
-        '11n': '/public/icons/thunderstorm-night.svg',
+        '11d': '/icons/thunderstorm-day.svg',
+        '11n': '/icons/thunderstorm-night.svg',
 
         // Snow
-        '13d': '/public/icons/snow.svg',
-        '13n': '/public/icons/snow.svg',
+        '13d': '/icons/snow.svg',
+        '13n': '/icons/snow.svg',
 
         // Atmosphere
-        '50d': '/public/icons/fog.svg',
-        '50n': '/public/icons/fog.svg',
+        '50d': '/icons/fog.svg',
+        '50n': '/icons/fog.svg',
 
         // Default
-        'default': '/public/icons/not-available.svg'
+        'default': '/icons/not-available.svg'
     };
 
     return iconMap[openWeatherIconCode] || iconMap.default;
