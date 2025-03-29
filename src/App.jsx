@@ -240,7 +240,7 @@ function App() {
                                 height='60px'
                                 style={{ marginRight: '16px' }}
                             />
-                                    <Typography variant="h4" sx={{ fontSize: '45px', fontWeight: 'bold', color: '#FFF' }}>ClimaVue </Typography>
+                                    <Typography variant="h4" sx={{ fontSize: '45px', fontWeight: 'bold', color: '#FFF' }}>Weather or Not </Typography>
                         </Box>
                             </Box>
                     {/* Location Message (appears below logo when using current location) */}
