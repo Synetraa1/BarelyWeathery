@@ -235,7 +235,7 @@ function App() {
                             <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 2, md: 0 } }}>
                             <img
                                 alt="icon"
-                                src="public/WeatherIcon.png"
+                                src="/WeatherIcon.png"
                                 width='100px'
                                 height='60px'
                                 style={{ marginRight: '16px' }}
