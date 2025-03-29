@@ -7,35 +7,12 @@ body {
     color: white;
 }
 
-/* Scrollbar styling */
-::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+/* Ensure full height layout */
+#root {
+    width: 100%;
 }
 
-::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.3);
-    border-radius: 3px;
-}
-
-/* Touch targets */
-button, [role="button"] {
-    min-height: 44px;
-    min-width: 44px;
-}
-
-body {
-    margin: 0;
-    background: linear-gradient(180deg, #272727 0%, #002471 100%);
-    min-height: 100vh;
-}
-
-@media (max-width: 600px) {
-    .MuiTypography-h1 {
-        font-size: 1.8rem !important;
-    }
-
-    .MuiCard-root {
-        margin-bottom: 16px;
-    }
+/* Make cards equal height */
+.MuiGrid-item {
+    display: flex;
 }

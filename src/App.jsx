@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
     TextField, Button, Box, Container, Typography, Paper,
     CircularProgress, Grid, Card, CardContent, Avatar,
-    MenuItem, Select, FormControl, InputLabel, IconButton, Tooltip,
+    MenuItem, Select, FormControl, InputLabel, IconButton, Tooltip, Link,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
@@ -10,6 +10,18 @@ import LocationSearchingIcon from '@mui/icons-material/LocationSearching';
 import './App.css';
 import Autocomplete from '@mui/material/Autocomplete';
 import { getMeteocon } from '@/utils/weatherIcons';
+import { createTheme, ThemeProvider } from '@mui/material/styles'
+
+
+const theme = createTheme({
+    typography: {
+        fontFamily: [
+            'Roboto', // Your chosen font
+            'Arial', // Fallback
+            'sans-serif'
+        ].join(','),
+    },
+});
 
 function App() {
     const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
@@ -151,7 +163,16 @@ function App() {
         }
     };
 
-    const tempUnit = unitSystem === 'metric' ? 'C' : 'F';
+    const convertWindSpeed = (speed, unitSystem) => {
+        if (unitSystem === 'metric') {
+            // OpenWeatherMap provides wind speed in m/s for metric
+            return Math.round(speed * 3.6); // Convert m/s to kph
+        }
+        // For imperial, OpenWeatherMap already converts to mph
+        return Math.round(speed); // Just round the mph value
+    };
+
+    const tempUnit = unitSystem === 'metric' ? String.fromCharCode(176) + 'C' : String.fromCharCode(176) + 'F';
     const speedUnit = unitSystem === 'metric' ? 'kph' : 'mph';
     const tempValue = (temp) => Math.round(temp);
 
@@ -161,31 +182,56 @@ function App() {
                 <CircularProgress />
                 <Typography sx={{ ml: 2 }}>Detecting your location...</Typography>
             </Container>
-        );
-    }
+                );
+
+                }
 
     return (
-        <Container maxWidth="xxl" sx={{ py: 1 }}>
-            <Paper elevation={3} sx={{ p: 5, mb: 4, backgroundColor: '#636363' }}>
+        <ThemeProvider theme={theme}>
+            <Container maxWidth="xxl" sx={{
+                py: 1,
+                px: { xs: 2, md: 4 },
+                display: 'flex',
+                flexDirection: 'column',
+                minHeight: '100vh'
+            }}>
+                <Paper elevation={3} sx={{
+                    p: { xs: 0, md: 5 },
+                    mb: 4,
+                    backgroundColor: '#636363',
+                    mx: 'auto',
+                    maxWidth: '1400px',
+                    width: '100%', 
+                    borderRadius: '16px',
+                }}>
+                <Box sx={{
+                    display: 'flex',
+                    flexDirection: { xs: 'column', md: 'row' },
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mb: 2,
+                }}>
                 {/* Header Section */}
                 <Box sx={{
                     display: 'flex',
                     flexDirection: 'column',
                     mb: 4,
+                    mt:1,
                     border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: '8px',
-                    p: 3,
-                    backgroundColor: 'rgba(0, 0, 0, 0.2)'
+                    borderRadius: '16px',
+                    backgroundColor: 'rgba(0, 0, 0, 0.2)', 
+                    width: '99%', // Add this line
+                    mx: 'auto' // This centers the box horizontally
                 }}>
                     {/* Top Row - Logo/Title and Buttons */}
                     <Box sx={{
                         display: 'flex',
-                        justifyContent: 'space-between',
+                        justifyContent: 'center',
                         alignItems: 'center',
                         mb: useCurrentLocation && weatherData ? 2 : 0
                     }}>
                         {/* Left Side - Logo and Title */}
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 2, md: 0 } }}>
                             <img
                                 alt="icon"
                                 src="public/WeatherIcon.png"
@@ -193,136 +239,158 @@ function App() {
                                 height='60px'
                                 style={{ marginRight: '16px' }}
                             />
-                            <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#FFF' }}>Metora</Typography>
+                                    <Typography variant="h4" sx={{ fontSize: '45px', fontWeight: 'bold', color: '#FFF' }}>ClimaVue </Typography>
                         </Box>
-
-                        {/* Right Side - Buttons */}
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <Tooltip title={useCurrentLocation ? "Search for specific cities" : "Use your location"}>
-                                <Button
-                                    variant='contained'
-                                    color={useCurrentLocation ? "primary" : "primary"}
-                                    onClick={handleLocationToggle}
-                                    startIcon={useCurrentLocation ? <MyLocationIcon /> : <LocationSearchingIcon />}
+                            </Box>
+                    {/* Location Message (appears below logo when using current location) */}
+                            {useCurrentLocation && weatherData && (
+                                <Typography
+                                    variant="body1"
+                                    sx={{
+                                        color: 'rgba(255, 255, 255, 0.8)',
+                                        textAlign: 'center',
+                                        mt: 1,
+                                        width: '100%',
+                                        fontSize:'20px'
+                                    }}
                                 >
-                                    {useCurrentLocation ? 'Search City' : 'Location'}
-                                </Button>
-                            </Tooltip>
+                                    Showing weather for your approximate location: <strong>{city}</strong>
+                                </Typography>
+                            )}
 
-                            <FormControl size="small" sx={{ minWidth: 100, color: '#FFF' }}>
-                                <InputLabel>Units</InputLabel>
-                                <Select
-                                    value={unitSystem}
-                                    onChange={(e) => setUnitSystem(e.target.value)}
-                                    label="Units"
-                                    sx={{ color: '#FFF' }}
+                            {!useCurrentLocation && (
+                                <Box
+                                    component="form"
+                                    onSubmit={handleSubmit}
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        gap: 2,
+                                        mt: 3,
+                                        width: '100%',
+                                    }}
                                 >
-                                    <MenuItem value="metric">Metric (C)</MenuItem>
-                                    <MenuItem value="imperial">Imperial (F)</MenuItem>
-                                </Select>
-                            </FormControl>
+                                    <Autocomplete
+                                        sx={{ width: '100%' }}
+                                        freeSolo
+                                        options={citySuggestions}
+                                        open={isSuggestionsOpen}
+                                        onOpen={() => setIsSuggestionsOpen(true)}
+                                        onClose={() => setIsSuggestionsOpen(false)}
+                                        onInputChange={async (event, newValue) => {
+                                            setInputValue(newValue);
+                                            if (newValue.length > 1) {
+                                                const suggestions = await fetchCitySuggestions(newValue);
+                                                setCitySuggestions(suggestions);
+                                            } else {
+                                                setCitySuggestions([]);
+                                            }
+                                        }}
+                                        inputValue={inputValue}
+                                        onChange={(event, newValue) => {
+                                            if (newValue) {
+                                                setCity(newValue.split(',')[0]);
+                                                setInputValue("");
+                                                fetchWeatherByCity(newValue.split(',')[0]);
+                                            }
+                                        }}
+                                        renderInput={(params) => (
+                                            <TextField
+                                                {...params}
+                                                fullWidth
+                                                label="Enter city name"
+                                                variant="outlined"
+                                                error={!!error}
+                                                helperText={error}
+                                                sx={{
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                                    '& .MuiOutlinedInput-root': {
+                                                        '& fieldset': {
+                                                            borderColor: 'rgba(255, 255, 255, 0.2)',
+                                                        },
+                                                        '&:hover fieldset': {
+                                                            borderColor: 'rgba(255, 255, 255, 0.4)',
+                                                        },
+                                                        '&.Mui-focused fieldset': {
+                                                            borderColor: 'white',
+                                                        },
+                                                        '& .MuiOutlinedInput-input::placeholder': {
+                                                            color: 'rgba(255, 255, 255, 0.6)',
+                                                            opacity: 1,
+                                                        },
+                                                    },
+                                                    '& .MuiInputLabel-root': {
+                                                        color: 'white',
+                                                        '&.Mui-focused': {
+                                                            color: 'white',
+                                                        },
+                                                    },
+                                                }}
+                                            />
+                                        )}
+                                    />
+                                    <Button
+                                        type="submit"
+                                        variant="contained"
+                                        size="large"
+                                        startIcon={<SearchIcon />}
+                                        sx={{ height: '56px' }}
+                                        disabled={!inputValue.trim()}
+                                    >
+                                        Search
+                                    </Button>
+                                </Box>
+                            )}
+                            <Box sx={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                gap: 2,
+                                mt: 2,
+                                mb:2,
+                                width: '100%',
+                                flexWrap: 'wrap'
+                            }}>
+                                <Tooltip title={useCurrentLocation ? "Search for specific cities" : "Use your location"}>
+                                    <Button
+                                        variant='contained'
+                                        color={useCurrentLocation ? "primary" : "primary"}
+                                        onClick={handleLocationToggle}
+                                        startIcon={useCurrentLocation ? <MyLocationIcon /> : <LocationSearchingIcon />}
+                                    >
+                                        {useCurrentLocation ? 'Search City' : 'Location'}
+                                    </Button>
+                                </Tooltip>
+
+                                <FormControl size="small" sx={{ minWidth: 100, color: '#FFF',}}>
+                                    <InputLabel>Units</InputLabel>
+                                    <Select
+                                        value={unitSystem}
+                                        onChange={(e) => setUnitSystem(e.target.value)}
+                                        label="Units"
+                                        sx={{ color: '#FFF' }}
+                                    >
+                                        <MenuItem value="metric">{`Metric (${String.fromCharCode(176)}C)`}</MenuItem>
+                                        <MenuItem value="imperial">{`Imperial (${String.fromCharCode(176)}F)`}</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </Box>
                         </Box>
                     </Box>
 
-                    {/* Location Message (appears below logo when using current location) */}
-                    {useCurrentLocation && weatherData && (
-                        <Typography variant="body1" sx={{
-                            color: 'rgba(255, 255, 255, 0.8)',
-                            ml: '35vh', // Matches logo width + margin
-                            mt: 1
-                        }}>
-                            Showing weather for your current location: <strong>{city}</strong>
-                        </Typography>
-                    )}
-                    {!useCurrentLocation && (
-                        <Box
-                            component="form"
-                            onSubmit={handleSubmit}
-                            sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 2,
-                                mt: 3,
-                                ml: '13vh',
-                            }}
-                        >
-                            <Autocomplete
-                                freeSolo
-                                options={citySuggestions}
-                                open={isSuggestionsOpen}
-                                onOpen={() => setIsSuggestionsOpen(true)}
-                                onClose={() => setIsSuggestionsOpen(false)}
-                                onInputChange={async (event, newValue) => {
-                                    setInputValue(newValue);
-                                    if (newValue.length > 1) {
-                                        const suggestions = await fetchCitySuggestions(newValue);
-                                        setCitySuggestions(suggestions);
-                                    } else {
-                                        setCitySuggestions([]);
-                                    }
-                                }}
-                                inputValue={inputValue}
-                                onChange={(event, newValue) => {
-                                    if (newValue) {
-                                        setCity(newValue.split(',')[0]); // Get just the city name
-                                        setInputValue("");
-                                        fetchWeatherByCity(newValue.split(',')[0]);
-                                    }
-                                }}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        fullWidth
-                                        label="Enter city name"
-                                        variant="outlined"
-                                        error={!!error}
-                                        helperText={error}
-                                        sx={{
-                                            minWidth: '85vh',
-                                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                            '& .MuiOutlinedInput-root': {
-                                                '& fieldset': {
-                                                    borderColor: 'rgba(255, 255, 255, 0.2)',
-                                                },
-                                                '&:hover fieldset': {
-                                                    borderColor: 'rgba(255, 255, 255, 0.4)',
-                                                },
-                                                '&.Mui-focused fieldset': {
-                                                    borderColor: 'white',
-                                                },
-                                                '& .MuiOutlinedInput-input::placeholder': {
-                                                    color: 'rgba(255, 255, 255, 0.6)',
-                                                    opacity: 1,
-                                                },
-                                            },
-                                            '& .MuiInputLabel-root': {
-                                                color: 'white',
-                                                '&.Mui-focused': {
-                                                    color: 'white',
-                                                },
-                                            },
-                                        }}
-                                    />
-                                )}
-                            />
-                            <Button
-                                type="submit"
-                                variant="contained"
-                                size="large"
-                                startIcon={<SearchIcon />}
-                                sx={{ height: '56px' }}
-                                disabled={!inputValue.trim()}
-                            >
-                                Search
-                            </Button>
-                        </Box>
-                    )}
-                </Box>
-
                 {weatherData && (
-                    <Grid container spacing={4} sx={{ justifyContent: 'flex-start', alignItems: 'stretch' }}>
-                        <Grid>
-                            <Card className="weather-card main-weather-card" sx={{ height: '100%', backgroundColor: '#0034a4', borderRadius: '16px', minWidth: '25vh' }}>
+                        <Grid container spacing={4} sx={{
+                            width: '100%',
+                            mx: 'auto',
+                            mb: 4,
+                            justifyContent: 'center',
+                            
+                        }}>
+                            <Grid sx={{ width: { xs: '100%', md: '100%', lg: '20%', } }}>
+                                <Card className="weather-card main-weather-card" sx={{
+                                    height:'100%',
+                                    backgroundColor: '#0034a4',
+                                    borderRadius: '16px' }}>
                                 <CardContent sx={{ color: '#FFF', textAlign: 'center', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                                     <Typography variant="h4" gutterBottom>
                                         {weatherData.name}, {weatherData.sys?.country}
@@ -347,14 +415,14 @@ function App() {
                                 </CardContent>
                             </Card>
                         </Grid>
-                        <Grid>
-                            <Card className="weather-card details-card" sx={{ height: '100%', backgroundColor: '#002471', borderRadius: '16px' }}>
+                            <Grid sx={{ width: { xs: '100%', md: '100%', lg:'70%' } }}>
+                            <Card className="weather-card details-card" sx={{ height: '100%', backgroundColor: '#002471', borderRadius: '16px', }}>
                                 <CardContent sx={{ height: '100%', color: '#FFF' }}>
                                     <Typography variant="h6" gutterBottom>Weather Details</Typography>
                                     <Grid container spacing={2}>
                                         {[
                                             ['Humidity', `${weatherData.main.humidity}%`],
-                                            ['Wind Speed', `${weatherData.wind.speed} ${speedUnit}`],
+                                                ['Wind Speed', `${convertWindSpeed(weatherData.wind?.speed, unitSystem)} ${speedUnit}`],
                                             ['Pressure', `${weatherData.main.pressure} hPa`],
                                             ['Feels Like', `${tempValue(weatherData.main.feels_like)}${tempUnit}`],
                                             ['Min Temp', `${tempValue(weatherData.main.temp_min)}${tempUnit}`],
@@ -368,13 +436,13 @@ function App() {
                                     </Grid>
 
                                     {/* Hourly Forecast Section */}
-                                    <Box sx={{ mt: 3 }}>
+                                        <Box sx={{ width: '100%' }}>
                                         <Typography variant="h6" gutterBottom>Next 24 Hours</Typography>
-                                        <Typography variant="p" sx={{ fontStyle: 'italic', color: '#808080' }} gutterBottom>Updated in 3 hour intervals</Typography>
+                                        <Typography variant="p" sx={{ fontStyle: 'italic', color: '#808080',  }} gutterBottom>Updated in 3 hour intervals</Typography>
                                         <Box sx={{ display: 'flex', overflowX: 'auto', gap: 1, py: 1 }}>
                                             {hourlyForecast.map((hour, index) => (
-                                                <Card key={index} sx={{ minWidth: 100 }}>
-                                                    <CardContent sx={{ textAlign: 'center' }}>
+                                                <Card key={index} sx={{ minWidth: 100, borderRadius: '16px' }}>
+                                                    <CardContent sx={{ textAlign: 'center',  }}>
                                                         <Typography variant="subtitle2">
                                                             {new Date(hour.dt * 1000).toLocaleTimeString([], { hour: '2-digit' })}:00
                                                         </Typography>
@@ -402,16 +470,30 @@ function App() {
                 )}
 
                 {forecast.length > 0 && (
-                    <Paper elevation={3} sx={{ p: 5, mt: 5, backgroundColor: '#002471', borderRadius: '16px' }}>
-                        <Typography variant="h5" gutterBottom sx={{ color: '#FFF' }}>5-Day Forecast</Typography>
-                        <Grid container spacing={10}>
+                        <Paper elevation={3} sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            p: 5,
+                            mt: 5,
+                            backgroundColor: '#002471',
+                            borderRadius: '16px',
+                            maxWidth: '1200px', // Match main paper width
+                            mx: 'auto', // Center horizontally
+                        }}>
+                        <Typography variant="h5" gutterBottom sx={{ color: '#FFF' }}>5-Day Forecast:</Typography>
+                        <Grid container spacing={3} sx={{
+                            justifyContent: 'center',
+                            width: '100%'
+                        }}>
                             {forecast.map((day, index) => (
-                                <Grid key={index}>
-                                    <Card sx={{ textAlign: 'center' }}>
+                                <Grid key={index} sx={{width: { xs: '100%', md: 'auto' },
+                                    maxWidth: { xs: '100%', md: 'none' },
+                                }}>
+                                    <Card sx={{ textAlign: 'center', borderRadius: '16px', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
                                         <CardContent>
                                             <Typography variant="subtitle1">
-                                                {new Date(day.dt * 1000).toLocaleDateString("en-US", {
-                                                    weekday: "short",
+                                                {new Date(day.dt * 1000).toLocaleDateString("en-GB", {
+                                                    weekday: "long",
                                                 })}
                                             </Typography>
                                             <Avatar
@@ -419,8 +501,8 @@ function App() {
                                                 alt={day.weather[0].description}
                                                 sx={{
                                                     width: 135,
-                                                    height: 80,
-                                                    backgroundColor: 'transparent'
+                                                    height: 90,
+                                                    backgroundColor: 'trasnparent'
                                                 }}
                                             />
                                             <Typography variant="h6">
@@ -434,16 +516,33 @@ function App() {
                                 </Grid>
                             ))}
                         </Grid>
-                    </Paper>
+                        </Paper>
                 )}
-
+                    <Typography sx={{ textAlign: 'center', pt: 2 }}>
+                        The ad revenue supports me a lot. If you want to buy me a coffee,{' '}
+                        <a
+                            href="https://paypal.me/Synetraa?country.x=FI&locale.x=en_US"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                                color: '#000',
+                                textDecoration: 'underline',
+                                '&:hover': {
+                                    textDecoration: 'underline'
+                                }
+                            }}
+                        >
+                           click here
+                        </a>
+                    </Typography>
                 {!weatherData && !firstLoad && !loading && (
                     <Typography textAlign="center" color="text.secondary">
                         {error || "Search for a city to see weather information"}
                     </Typography>
-                )}
-            </Paper>
-        </Container>
+                    )}
+                </Paper>
+                </Container>
+            </ThemeProvider>
     );
 }
 
