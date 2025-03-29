@@ -1,21 +1,41 @@
+/* Base styles */
 body {
+    margin: 0;
+    padding: 0;
     min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
+    background: linear-gradient(180deg, #272727 0%, #002471 100%);
+    color: white;
 }
 
-/* Add these styles to your App.css */
-.weather-card {
-    background-color: #f5f5f5; /* Light gray background */
-    height: 100%; /* Make all cards take full height */
+/* Scrollbar styling */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
 }
 
-.main-weather-card {
-    background-color: #e3f2fd; /* Light blue background for main card */
+::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
 }
 
-.details-card {
-    background-color: #f5f5f5; /* Light gray background for details card */
+/* Touch targets */
+button, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+}
+
+body {
+    margin: 0;
+    background: linear-gradient(180deg, #272727 0%, #002471 100%);
+    min-height: 100vh;
+}
+
+@media (max-width: 600px) {
+    .MuiTypography-h1 {
+        font-size: 1.8rem !important;
+    }
+
+    .MuiCard-root {
+        margin-bottom: 16px;
+    }
 }

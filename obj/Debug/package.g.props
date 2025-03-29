@@ -13,8 +13,8 @@
     <PackageJsonDependenciesEmotionStyled Condition="$(PackageJsonDependenciesEmotionStyled) == ''">^11.14.0</PackageJsonDependenciesEmotionStyled>
     <PackageJsonDependenciesMuiMaterial Condition="$(PackageJsonDependenciesMuiMaterial) == ''">^5.13.7</PackageJsonDependenciesMuiMaterial>
     <PackageJsonDependenciesMuiStyledEngineSc Condition="$(PackageJsonDependenciesMuiStyledEngineSc) == ''">^5.14.8</PackageJsonDependenciesMuiStyledEngineSc>
-    <PackageJsonDependenciesReact Condition="$(PackageJsonDependenciesReact) == ''">^18.3.0</PackageJsonDependenciesReact>
-    <PackageJsonDependenciesReactDom Condition="$(PackageJsonDependenciesReactDom) == ''">^18.3.0</PackageJsonDependenciesReactDom>
+    <PackageJsonDependenciesReact Condition="$(PackageJsonDependenciesReact) == ''">^18.3.1</PackageJsonDependenciesReact>
+    <PackageJsonDependenciesReactDom Condition="$(PackageJsonDependenciesReactDom) == ''">^18.3.1</PackageJsonDependenciesReactDom>
     <PackageJsonDependenciesStyledComponents Condition="$(PackageJsonDependenciesStyledComponents) == ''">^6.1.16</PackageJsonDependenciesStyledComponents>
     <PackageJsonDevdependenciesEslintJs Condition="$(PackageJsonDevdependenciesEslintJs) == ''">^9.21.0</PackageJsonDevdependenciesEslintJs>
     <PackageJsonDevdependenciesTypesReact Condition="$(PackageJsonDevdependenciesTypesReact) == ''">^18.2.55</PackageJsonDevdependenciesTypesReact>
