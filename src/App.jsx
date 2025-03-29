@@ -11,6 +11,7 @@ import './App.css';
 import Autocomplete from '@mui/material/Autocomplete';
 import { getMeteocon } from '@/utils/weatherIcons';
 import { createTheme, ThemeProvider } from '@mui/material/styles'
+import { Analytics } from "@vercel/analytics/react"
 
 
 const theme = createTheme({
