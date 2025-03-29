@@ -1,0 +1,14 @@
+:root {
+    font-family: Roboto;
+    line-height: 1.5;
+    font-weight: 400;
+    background: linear-gradient(180deg, #272727 0%, #002471 100%);
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
