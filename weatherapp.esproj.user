@@ -3,8 +3,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DebuggerFlavor>LaunchJsonDebugger</DebuggerFlavor>
     <LaunchJsonTarget>{
-  "name": "localhost (Edge)",
-  "type": "edge",
+  "name": "localhost (Chrome)",
+  "type": "chrome",
   "request": "launch",
   "url": "http://localhost:5173",
   "webRoot": "C:\\Users\\hickm\\source\\repos\\WeatherApp\\WeatherApp"

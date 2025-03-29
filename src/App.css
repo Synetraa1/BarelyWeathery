@@ -6,57 +6,16 @@ body {
     padding: 1rem;
 }
 
-.wrapper {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 1.5rem;
-    padding: 2rem;
-    min-width: 400px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+/* Add these styles to your App.css */
+.weather-card {
+    background-color: #f5f5f5; /* Light gray background */
+    height: 100%; /* Make all cards take full height */
 }
 
-
-.city {
-    font-size: 2.5rem;
-    font-weight: bold;
+.main-weather-card {
+    background-color: #e3f2fd; /* Light blue background for main card */
 }
 
-.temperature {
-    font-size: 3.5rem;
-    font-weight: bold;
-}
-
-.condition {
-    font-size: 1.25rem;
-}
-
-.weather-details {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-}
-
-
-.forecast {
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    padding-top: 2rem;
-}
-
-.forecast-header {
-    font-size: 1.5rem;
-    font-weight: bold;
-}
-
-.forecast-days {
-    display: flex;
-    justify-content: space-between;
-}
-
-.forecast-day {
-    font-weight: bold;
-}
-
-.forecast-temp,
-.forecast-condition {
-    font-size: 0.875rem;
+.details-card {
+    background-color: #f5f5f5; /* Light gray background for details card */
 }
