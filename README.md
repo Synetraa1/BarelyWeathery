@@ -118,10 +118,5 @@ For issues, feedback, or questions about BarelyWeather, please:
 - Create an issue on the [GitHub repository](https://github.com/Synetraa1/WeatherApp)
 - Contact the developer through GitHub
 
-## License
-
-This project is licensed under the terms specified in the repository. Please refer to the LICENSE file in the GitHub repository for details.
-
----
 
 *Last updated: March 30, 2025*
