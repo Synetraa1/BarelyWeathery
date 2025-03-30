@@ -2,3 +2,6 @@
 * text=auto
 *.jsx linguist-language=JavaScript
 *.js linguist-language=JavaScript
+
+public/* linguist-vendored
+weather-icons-master/* linguist-vendored
