@@ -1,8 +1,8 @@
-# BarelyWeather App Documentation
+# BarelyWeathery App Documentation
 
 ## Overview
 
-BarelyWeather is a simple, user-friendly weather application that provides real-time weather information and forecasts. The application is hosted at [barelyweather.com](https://barelyweather.com).
+BarelyWeather is a simple, user-friendly weather application that provides real-time weather information and forecasts. The application is hosted at [barelyweathery.com](https://barelyweathery.com).
 
 ## Features
 
@@ -22,7 +22,7 @@ BarelyWeather is a simple, user-friendly weather application that provides real-
 
 ### Getting Started
 
-1. **Access the Application**: Navigate to [barelyweather.com](https://barelyweather.com) in your web browser.
+1. **Access the Application**: Navigate to [barelyweathery.com](https://barelyweathery.com) in your web browser.
 
 2. **Location Permissions**: Upon first visit, the app will request permission to access your location. Allow this for the most accurate local weather information.
 
@@ -91,7 +91,7 @@ The React components use hooks to manage API calls and state, while MUI componen
 
 ### Common Issues
 
-- **Location Not Found**: Ensure you've entered a valid location name or postal code.
+- **Location Not Found**: Ensure you've entered a valid location name.
 - **Weather Data Not Loading**: Check your internet connection or try refreshing the page.
 - **Inaccurate Location**: Your IP-based location might differ from your actual location. Use the search function to enter your specific location.
 - **Permission Denied**: If you previously denied location access, you'll need to update your browser settings to allow location access for barelyweather.com.
