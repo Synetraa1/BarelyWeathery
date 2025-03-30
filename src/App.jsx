@@ -11,7 +11,8 @@ import './App.css';
 import Autocomplete from '@mui/material/Autocomplete';
 import { getMeteocon } from '@/utils/weatherIcons';
 import { createTheme, ThemeProvider } from '@mui/material/styles'
-import { Analytics } from "@vercel/analytics/react"
+import { Analytics } from "@vercel/analytics/react";
+import AdBanner from "./AdBanner.jsx";
 
 
 const theme = createTheme({
@@ -188,6 +189,7 @@ function App() {
                 }
 
     return (
+
         <ThemeProvider theme={theme}>
             <Container maxWidth="xxl" sx={{
                 py: 1,
@@ -196,6 +198,7 @@ function App() {
                 flexDirection: 'column',
                 minHeight: '100vh'
             }}>
+
                 <Paper elevation={3} sx={{
                     p: { xs: 0, md: 5 },
                     mb: 4,
@@ -205,6 +208,23 @@ function App() {
                     width: '100%', 
                     borderRadius: '16px',
                 }}>
+                    <Typography sx={{ textAlign: 'center', mt:2}}>
+                        The ad revenue supports me a lot. If you want to buy me a coffee,{' '}
+                        <a
+                            href="https://paypal.me/Synetraa?country.x=FI&locale.x=en_US"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                                color: '#000',
+                                textDecoration: 'underline',
+                                '&:hover': {
+                                    textDecoration: 'underline'
+                                }
+                            }}
+                        >
+                            click here
+                        </a>
+                    </Typography>
                 <Box sx={{
                     display: 'flex',
                     flexDirection: { xs: 'column', md: 'row' },
@@ -418,23 +438,45 @@ function App() {
                         </Grid>
                             <Grid sx={{ width: { xs: '100%', md: '100%', lg:'70%' } }}>
                             <Card className="weather-card details-card" sx={{ height: '100%', backgroundColor: '#002471', borderRadius: '16px', }}>
-                                <CardContent sx={{ height: '100%', color: '#FFF' }}>
+                                <CardContent sx={{ height: '100%', color: '#FFF', }}>
                                     <Typography variant="h6" gutterBottom>Weather Details</Typography>
-                                    <Grid container spacing={2}>
-                                        {[
-                                            ['Humidity', `${weatherData.main.humidity}%`],
+                                        <Grid container spacing={2} sx={{
+                                            width: '100%',
+                                            display: 'grid',
+                                            gridTemplateColumns: {
+                                                xs: 'repeat(1, 1fr)', // 1 column on extra small screens
+                                                sm: 'repeat(2, 1fr)',  // 2 columns on small screens
+                                                md: 'repeat(3, 1fr)'   // 3 columns on medium screens
+                                            }
+                                        }}>
+                                            {[
+                                                ['Humidity', `${weatherData.main.humidity}%`],
                                                 ['Wind Speed', `${convertWindSpeed(weatherData.wind?.speed, unitSystem)} ${speedUnit}`],
-                                            ['Pressure', `${weatherData.main.pressure} hPa`],
-                                            ['Feels Like', `${tempValue(weatherData.main.feels_like)}${tempUnit}`],
-                                            ['Min Temp', `${tempValue(weatherData.main.temp_min)}${tempUnit}`],
-                                            ['Max Temp', `${tempValue(weatherData.main.temp_max)}${tempUnit}`]
-                                        ].map(([label, value]) => (
-                                            <Grid key={label} sx={{ backgroundColor: '#FFF', color: '#000', px: 2, py: 2, borderRadius: '16px' }}>
-                                                <Typography>{label}</Typography>
-                                                <Typography variant="h6">{value}</Typography>
-                                            </Grid>
-                                        ))}
-                                    </Grid>
+                                                ['Pressure', `${weatherData.main.pressure} hPa`],
+                                                ['Feels Like', `${tempValue(weatherData.main.feels_like)}${tempUnit}`],
+                                                ['Min Temp', `${tempValue(weatherData.main.temp_min)}${tempUnit}`],
+                                                ['Max Temp', `${tempValue(weatherData.main.temp_max)}${tempUnit}`]
+                                            ].map(([label, value]) => (
+                                                <Grid item key={label} sx={{
+                                                    width: '100% !important', // Force full width of grid cell
+                                                    minWidth: 0, // Prevent overflow
+                                                }}>
+                                                    <Card sx={{
+                                                        height: '100%',
+                                                        backgroundColor: '#FFF',
+                                                        color: '#000',
+                                                        borderRadius: '16px',
+                                                        display: 'flex',
+                                                        flexDirection: 'column'
+                                                    }}>
+                                                        <CardContent sx={{ flexGrow: 1 }}>
+                                                            <Typography variant="subtitle1">{label}</Typography>
+                                                            <Typography variant="h6">{value}</Typography>
+                                                        </CardContent>
+                                                    </Card>
+                                                </Grid>
+                                            ))}
+                                        </Grid>
 
                                     {/* Hourly Forecast Section */}
                                         <Box sx={{ width: '100%' }}>
@@ -519,23 +561,6 @@ function App() {
                         </Grid>
                         </Paper>
                 )}
-                    <Typography sx={{ textAlign: 'center', pt: 2 }}>
-                        The ad revenue supports me a lot. If you want to buy me a coffee,{' '}
-                        <a
-                            href="https://paypal.me/Synetraa?country.x=FI&locale.x=en_US"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                                color: '#000',
-                                textDecoration: 'underline',
-                                '&:hover': {
-                                    textDecoration: 'underline'
-                                }
-                            }}
-                        >
-                           click here
-                        </a>
-                    </Typography>
                 {!weatherData && !firstLoad && !loading && (
                     <Typography textAlign="center" color="text.secondary">
                         {error || "Search for a city to see weather information"}
