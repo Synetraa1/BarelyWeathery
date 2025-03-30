@@ -197,6 +197,7 @@ function App() {
                 flexDirection: 'column',
                 minHeight: '100vh'
             }}>
+                <Analytics />
 
                 <Paper elevation={3} sx={{
                     p: { xs: 0, md: 5 },
