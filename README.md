@@ -13,7 +13,8 @@ BarelyWeather is a simple, user-friendly weather application that provides real-
 
 ## Technology Stack
 
-- **Frontend**: Built with HTML, CSS, and JavaScript
+- **Frontend**: Built with React and MUI (Material-UI) library
+- **Build Tool**: Vite for fast development and optimized production builds
 - **Weather Data**: Leverages a third-party weather API for accurate, up-to-date information
 - **Geolocation**: Uses browser geolocation services to detect user location
 
@@ -62,12 +63,20 @@ The main screen displays:
 
 ### Repository Structure
 
-The WeatherApp repository contains the following key components:
+The WeatherApp repository is structured as a React + Vite application with MUI components:
 
-- **HTML**: Structure of the web application
-- **CSS**: Styling and responsive design
-- **JavaScript**: Application logic and API integration
-- **Assets**: Icons, images, and other static resources
+- **src/**: Source code directory
+  - **components/**: React component files
+  - **assets/**: Icons, images, and other static resources
+  - **hooks/**: Custom React hooks
+  - **utils/**: Utility functions
+  - **context/**: React context providers
+  - **App.jsx**: Main application component
+  - **main.jsx**: Entry point for the React application
+- **public/**: Static files served directly
+- **index.html**: HTML entry point
+- **vite.config.js**: Vite configuration
+- **package.json**: Project dependencies and scripts
 
 ### API Integration
 
@@ -76,31 +85,7 @@ The application integrates with a weather data API to fetch:
 - Weather forecasts (hourly and daily)
 - Location data based on coordinates or search queries
 
-### Local Development
-
-To run this application locally:
-
-1. Clone the repository:
-   ```
-   git clone https://github.com/Synetraa1/WeatherApp.git
-   ```
-
-2. Navigate to the project directory:
-   ```
-   cd WeatherApp
-   ```
-
-3. If the project uses npm, install dependencies:
-   ```
-   npm install
-   ```
-
-4. Start the local development server:
-   ```
-   npm start
-   ```
-
-5. Open your browser and navigate to the local server address (typically http://localhost:3000).
+The React components use hooks to manage API calls and state, while MUI components provide the user interface elements with Material Design styling.
 
 ## Troubleshooting
 
