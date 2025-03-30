@@ -12,7 +12,6 @@ import Autocomplete from '@mui/material/Autocomplete';
 import { getMeteocon } from '@/utils/weatherIcons';
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import { Analytics } from "@vercel/analytics/react";
-import AdBanner from "./AdBanner.jsx";
 
 
 const theme = createTheme({
