@@ -1,8 +1,8 @@
-# BarelyWeather App Documentation
+# BarelyWeathery App Documentation
 
 ## Overview
 
-BarelyWeather is a simple, user-friendly weather application that provides real-time weather information and forecasts. The application is hosted at [barelyweather.com](https://barelyweather.com).
+BarelyWeather is a simple, user-friendly weather application that provides real-time weather information and forecasts. The application is hosted at [barelyweathery.com](https://barelyweathery.com).
 
 ## Features
 
@@ -22,7 +22,7 @@ BarelyWeather is a simple, user-friendly weather application that provides real-
 
 ### Getting Started
 
-1. **Access the Application**: Navigate to [barelyweather.com](https://barelyweather.com) in your web browser.
+1. **Access the Application**: Navigate to [barelyweathery.com](https://barelyweathery.com) in your web browser.
 
 2. **Location Permissions**: Upon first visit, the app will request permission to access your location. Allow this for the most accurate local weather information.
 
