@@ -293,7 +293,7 @@ function App() {
                                     }}
                                 >
                                     <Autocomplete
-                                        sx={{ width: '100%' }}
+                                        sx={{ width: '80%' }}
                                         freeSolo
                                         options={citySuggestions}
                                         open={isSuggestionsOpen}
@@ -321,6 +321,7 @@ function App() {
                                                 {...params}
                                                 fullWidth
                                                 label="Enter city name"
+                                                placeholder="E.g London, New York, Tokyo"
                                                 variant="outlined"
                                                 error={!!error}
                                                 helperText={error}
@@ -457,7 +458,7 @@ function App() {
                                                 ['Min Temp', `${tempValue(weatherData.main.temp_min)}${tempUnit}`],
                                                 ['Max Temp', `${tempValue(weatherData.main.temp_max)}${tempUnit}`]
                                             ].map(([label, value]) => (
-                                                <Grid item key={label} sx={{
+                                                <Grid key={label} sx={{
                                                     width: '100% !important', // Force full width of grid cell
                                                     minWidth: 0, // Prevent overflow
                                                 }}>
