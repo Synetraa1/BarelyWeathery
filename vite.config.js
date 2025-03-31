@@ -8,5 +8,12 @@ export default defineConfig({
         alias: {
             '@': path.resolve('./src')
         }
+    },
+
+    server: {
+        historyApiFallback: true
+    },
+    preview: {
+        historyApiFallback: true
     }
 })
