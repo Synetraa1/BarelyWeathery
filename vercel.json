@@ -1,0 +1,34 @@
+{
+  "routes": [
+    {
+      "src": "/",
+      "dest": "/"
+    },
+    {
+      "src": "/about",
+      "dest": "/"
+    },
+    {
+      "src": "/terms",
+      "dest": "/"
+    },
+    {
+      "src": "/privacy",
+      "dest": "/"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/about",
+      "destination": "/"
+    },
+    {
+      "source": "/terms",
+      "destination": "/"
+    },
+    {
+      "source": "/privacy",
+      "destination": "/"
+    }
+  ]
+}
