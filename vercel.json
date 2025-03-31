@@ -1,23 +1,18 @@
 {
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
   "routes": [
     {
-      "src": "/",
-      "dest": "/"
-    },
-    {
-      "src": "/about",
-      "dest": "/"
-    },
-    {
-      "src": "/terms",
-      "dest": "/"
-    },
-    {
-      "src": "/privacy",
-      "dest": "/"
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ],
   "rewrites": [
+    {
+      "source": "/",
+      "destination": "/"
+    },
     {
       "source": "/about",
       "destination": "/"
