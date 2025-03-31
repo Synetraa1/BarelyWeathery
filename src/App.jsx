@@ -5,7 +5,6 @@ import {
     MenuItem, Select, FormControl, InputLabel, IconButton, Tooltip, Link,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import { SpeedInsights } from "@vercel/speed-insights/next"
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import LocationSearchingIcon from '@mui/icons-material/LocationSearching';
 import './App.css';
