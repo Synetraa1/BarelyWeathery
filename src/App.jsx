@@ -5,8 +5,7 @@ import {
     MenuItem, Select, FormControl, InputLabel, IconButton, Tooltip, Link,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import InfoIcon from '@mui/icons-material/Info';
-import InfoOutlinedIcon from '@mui/icons-material/Info';
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import LocationSearchingIcon from '@mui/icons-material/LocationSearching';
 import './App.css';
@@ -640,6 +639,8 @@ function App() {
                 <AdPlaceholder height="90px" position="bottom" />
 
                 <CookieConsent /> {/* Cookie consent dialog */}
+                <SpeedInsights />
+                <Analytics/>
 
                 {/* Site footer */}
                 <Box component="footer" sx={{

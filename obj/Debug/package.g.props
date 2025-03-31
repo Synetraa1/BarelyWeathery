@@ -14,6 +14,7 @@
     <PackageJsonDependenciesMuiIconsMaterial Condition="$(PackageJsonDependenciesMuiIconsMaterial) == ''">^7.0.1</PackageJsonDependenciesMuiIconsMaterial>
     <PackageJsonDependenciesMuiMaterial Condition="$(PackageJsonDependenciesMuiMaterial) == ''">^7.0.1</PackageJsonDependenciesMuiMaterial>
     <PackageJsonDependenciesVercelAnalytics Condition="$(PackageJsonDependenciesVercelAnalytics) == ''">^1.5.0</PackageJsonDependenciesVercelAnalytics>
+    <PackageJsonDependenciesVercelSpeedInsights Condition="$(PackageJsonDependenciesVercelSpeedInsights) == ''">^1.2.0</PackageJsonDependenciesVercelSpeedInsights>
     <PackageJsonDependenciesMinimist Condition="$(PackageJsonDependenciesMinimist) == ''">^1.2.8</PackageJsonDependenciesMinimist>
     <PackageJsonDependenciesReact Condition="$(PackageJsonDependenciesReact) == ''">19.0.0</PackageJsonDependenciesReact>
     <PackageJsonDependenciesReactDom Condition="$(PackageJsonDependenciesReactDom) == ''">19.0.0</PackageJsonDependenciesReactDom>
