@@ -259,7 +259,7 @@ function App() {
                 <Box sx={{
                     display: 'flex',
                     flexDirection: 'column',
-                    mb: 4,
+                    mb: 2,
                     mt:1,
                     border: '1px solid rgba(255, 255, 255, 0.2)',
                     borderRadius: '16px',
@@ -267,8 +267,6 @@ function App() {
                     width: '100%',
                     mx: 'auto'
                         }}>
-                            {/* AdSense ad unit will be placed here */}
-                            <AdPlaceholder height="90px" position="top" />
                             {/* Top Row - Logo*/}
                             <Box sx={{
                                 display: 'flex',
@@ -451,6 +449,8 @@ function App() {
                             </Box>
                         </Box>
                     </Box>
+                    {/* AdSense ad unit will be placed here */}
+                    <AdPlaceholder height="90px" position="top" />
 
                 {/* Weather display grid - only shows when data is loaded */}
                 {weatherData && (
