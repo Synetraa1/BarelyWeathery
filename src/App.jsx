@@ -635,14 +635,14 @@ function App() {
                 </Paper>
 
                 {/* AdSense ad unit will be placed here */}
-                <AdPlaceholder height="90px" position="bottom" />
+                <AdPlaceholder height="150px" position="bottom" />
 
                 <CookieConsent /> {/* Cookie consent dialog */}
                 <Analytics/>
 
                 {/* Site footer */}
                 <Box component="footer" sx={{
-                    mt: 25,
+                    mt: 10,
                     py: 3,
                     textAlign: 'center',
                     borderTop: '1px solid rgba(255, 255, 255, 0.2)',
