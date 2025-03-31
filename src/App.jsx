@@ -5,6 +5,8 @@ import {
     MenuItem, Select, FormControl, InputLabel, IconButton, Tooltip, Link,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
+import InfoIcon from '@mui/icons-material/Info';
+import InfoOutlinedIcon from '@mui/icons-material/Info';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import LocationSearchingIcon from '@mui/icons-material/LocationSearching';
 import './App.css';
@@ -12,12 +14,12 @@ import Autocomplete from '@mui/material/Autocomplete';
 import { getMeteocon } from '@/utils/weatherIcons';
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import { Analytics } from "@vercel/analytics/react";
-
+import CookieConsent from './CookieConsent';
 
 const theme = createTheme({
     typography: {
         fontFamily: [
-            'Roboto', // Your chosen font
+            'Roboto', // The chosen font
             'Arial', // Fallback
             'sans-serif'
         ].join(','),
@@ -25,7 +27,10 @@ const theme = createTheme({
 });
 
 function App() {
+    // Weather data API key from environment variables
     const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
+
+    // State variables for app data
     const [weatherData, setWeatherData] = useState(null);
     const [forecast, setForecast] = useState([]);
     const [hourlyForecast, setHourlyForecast] = useState([]);
@@ -39,30 +44,38 @@ function App() {
     const [citySuggestions, setCitySuggestions] = useState([]);
     const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
 
+    // Check if we're in development mode
     const isDevelopment = import.meta.env.MODE === 'development';
 
+    // Basic fetch function with error handling
     const fetchWeatherData = async (url) => {
         const response = await fetch(url);
         if (!response.ok) throw new Error('Data unavailable');
         return await response.json();
     };
 
+    // Fetch weather data based on coordinates
     const fetchWeatherByCoords = useCallback(async (lat, lon) => {
         try {
             setLoading(true);
             setError(null);
 
+            // Build API URLs for current weather and forecast
             const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=${unitSystem}`;
             const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=${unitSystem}`;
 
+            // Fetch both in parallel for performance
             const [weatherData, forecastData] = await Promise.all([
                 fetchWeatherData(weatherUrl),
                 fetchWeatherData(forecastUrl)
             ]);
 
+            // Update state with results
             setWeatherData(weatherData);
             setCity(weatherData.name);
+            // Get one forecast per day (every 8th item = 24 hours)
             setForecast(forecastData.list.filter((_, index) => index % 8 === 0).slice(0, 5));
+            // Get hourly forecast for the next 24 hours
             setHourlyForecast(forecastData.list.slice(0, 8));
         } catch (error) {
             console.error('Fetch error:', error);
@@ -141,7 +154,6 @@ function App() {
         }
     };
 
-    // Then update your useEffect hooks:
     useEffect(() => {
         if (firstLoad) {
             fetchWeather();
@@ -152,7 +164,7 @@ function App() {
         if (!firstLoad) {
             fetchWeather();
         }
-    }, [useCurrentLocation, unitSystem, fetchWeather]);
+    }, [firstLoad, useCurrentLocation, unitSystem, fetchWeather]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -164,19 +176,47 @@ function App() {
         }
     };
 
-    const convertWindSpeed = (speed, unitSystem) => {
-        if (unitSystem === 'metric') {
-            // OpenWeatherMap provides wind speed in m/s for metric
-            return Math.round(speed * 3.6); // Convert m/s to kph
-        }
-        // For imperial, OpenWeatherMap already converts to mph
-        return Math.round(speed); // Just round the mph value
+    // Ad placeholder component - will be replaced with actual ads later
+    const AdPlaceholder = ({ width, height, }) => {
+        return (
+            <Box
+                sx={{
+                    width: width || '100%',
+                    height: height || '90px',
+                    backgroundColor: 'rgba(200, 200, 200, 0.1)',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    my: 2,
+                    border: '1px dashed rgba(255, 255, 255, 0.2)',
+                    borderRadius: '8px',
+                    position: 'relative',
+                    overflow: 'hidden'
+                }}
+            >
+                <Typography variant="caption" color="rgba(255, 255, 255, 0.5)">
+                    Advertisement
+                </Typography>
+            </Box>
+        );
     };
 
+    // Convert wind speed based on unit system selected
+    const convertWindSpeed = (speed, unitSystem) => {
+        if (unitSystem === 'metric') {
+            // API gives m/s for metric, but we want km/h for display
+            return Math.round(speed * 3.6);
+        }
+        // Already in mph for imperial
+        return Math.round(speed);
+    };
+
+    // Temperature unit symbol and formatting
     const tempUnit = unitSystem === 'metric' ? String.fromCharCode(176) + 'C' : String.fromCharCode(176) + 'F';
     const speedUnit = unitSystem === 'metric' ? 'kph' : 'mph';
     const tempValue = (temp) => Math.round(temp);
 
+    // Show loading screen on first load
     if (loading && firstLoad) {
         return (
             <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -187,6 +227,7 @@ function App() {
 
                 }
 
+    // Main component render
     return (
 
         <ThemeProvider theme={theme}>
@@ -199,32 +240,16 @@ function App() {
             }}>
                 <Analytics />
 
+                {/* Main content container */}
                 <Paper elevation={3} sx={{
                     p: { xs: 0, md: 5 },
                     mb: 4,
-                    backgroundColor: '#636363',
+                    backgroundColor: { xs: 'transparent', md: 'transparent', lg:'#636363' },
                     mx: 'auto',
                     maxWidth: '1400px',
                     width: '100%', 
                     borderRadius: '16px',
                 }}>
-                    <Typography sx={{ textAlign: 'center', mt:2}}>
-                        The ad revenue supports me a lot. If you want to buy me a coffee,{' '}
-                        <a
-                            href="https://paypal.me/Synetraa?country.x=FI&locale.x=en_US"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                                color: '#000',
-                                textDecoration: 'underline',
-                                '&:hover': {
-                                    textDecoration: 'underline'
-                                }
-                            }}
-                        >
-                            click here
-                        </a>
-                    </Typography>
                 <Box sx={{
                     display: 'flex',
                     flexDirection: { xs: 'column', md: 'row' },
@@ -241,27 +266,30 @@ function App() {
                     border: '1px solid rgba(255, 255, 255, 0.2)',
                     borderRadius: '16px',
                     backgroundColor: 'rgba(0, 0, 0, 0.2)', 
-                    width: '99%', // Add this line
-                    mx: 'auto' // This centers the box horizontally
-                }}>
-                    {/* Top Row - Logo/Title and Buttons */}
-                    <Box sx={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        mb: useCurrentLocation && weatherData ? 2 : 0
-                    }}>
-                        {/* Left Side - Logo and Title */}
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 2, md: 0 } }}>
-                            <img
-                                alt="icon"
-                                src="/WeatherIcon.png"
-                                width='100px'
-                                height='60px'
-                                style={{ marginRight: '16px' }}
-                            />
-                                    <Typography variant="h4" sx={{ fontSize: '45px', fontWeight: 'bold', color: '#FFF' }}>Weather or Not </Typography>
-                        </Box>
+                    width: '100%',
+                    mx: 'auto'
+                        }}>
+                            {/* AdSense ad unit will be placed here */}
+                            <AdPlaceholder height="90px" position="top" />
+                            {/* Top Row - Logo*/}
+                            <Box sx={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                mb: useCurrentLocation && weatherData ? 2 : 0
+                            }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 2, md: 0 } }}>
+                                    <img
+                                        alt="BarelyWeathery Logo"
+                                        src="/Logo.png"
+                                        style={{
+                                            height: '100px',
+                                            width: 'auto',
+                                            maxWidth: '300px',
+                                            marginTop:'16px',
+                                        }}
+                                    />
+                                </Box>
                             </Box>
                     {/* Location Message (appears below logo when using current location) */}
                             {useCurrentLocation && weatherData && (
@@ -371,7 +399,8 @@ function App() {
                                 mt: 2,
                                 mb:2,
                                 width: '100%',
-                                flexWrap: 'wrap'
+                                flexWrap: 'wrap',
+                                px: { xs: 0, sm: 0 },
                             }}>
                                 <Tooltip title={useCurrentLocation ? "Search for specific cities" : "Use your location"}>
                                     <Button
@@ -397,27 +426,54 @@ function App() {
                                     </Select>
                                 </FormControl>
                             </Box>
+                            <Box sx={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                mt: { xs: 0, sm: 0 }
+                            }}>
+                                <Tooltip title="About BarelyWeathery">
+                                    <Button
+                                        variant="fill"
+                                        color="primary"
+                                        component={Link}
+                                        href="/About"
+                                        target="_blank"
+                                        sx={{
+                                            borderColor: 'rgba(255, 255, 255, 0.3)',
+                                            color: 'white',
+                                            '&:hover': {
+                                                borderColor: 'white',
+                                                backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                                            }
+                                        }}
+                                    >
+                                        Read More about BarelyWeatherly
+                                    </Button>
+                                </Tooltip>
+                            </Box>
                         </Box>
                     </Box>
 
+                {/* Weather display grid - only shows when data is loaded */}
                 {weatherData && (
                         <Grid container spacing={4} sx={{
                             width: '100%',
-                            mx: 'auto',
                             mb: 4,
-                            justifyContent: 'center',
+                            justifyContent: 'flex-start',
+                            
                             
                         }}>
-                            <Grid sx={{ width: { xs: '100%', md: '100%', lg: '20%', } }}>
+                            {/* Current weather in weather card */}
+                            <Grid sx={{ width: { xs: '100%', md: '100%', lg: '25%', } }}>
                                 <Card className="weather-card main-weather-card" sx={{
                                     height:'100%',
                                     backgroundColor: '#0034a4',
                                     borderRadius: '16px' }}>
-                                <CardContent sx={{ color: '#FFF', textAlign: 'center', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                                    <CardContent sx={{ color: '#FFF', textAlign: 'center', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                                     <Typography variant="h4" gutterBottom>
                                         {weatherData.name}, {weatherData.sys?.country}
                                     </Typography>
-                                    <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}> {/* Added container Box */}
+                                    <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
                                         <Avatar
                                             src={getMeteocon(weatherData.weather[0].icon)}
                                             alt={weatherData.weather[0].description}
@@ -433,11 +489,17 @@ function App() {
                                     </Typography>
                                     <Typography variant="subtitle1" color="#FFF" sx={{ textTransform: 'capitalize' }}>
                                         {weatherData.weather[0].description}
-                                    </Typography>
-                                </CardContent>
+                                        </Typography>
+                                    </CardContent>
+
                             </Card>
-                        </Grid>
-                            <Grid sx={{ width: { xs: '100%', md: '100%', lg:'70%' } }}>
+                            </Grid>
+
+                            {/* Weather details panel */}
+                            <Grid sx={{
+                                width: { xs: '100%', md: '100%', lg: '72%' },
+                                marginLeft: 'auto',
+                            }}>
                             <Card className="weather-card details-card" sx={{ height: '100%', backgroundColor: '#002471', borderRadius: '16px', }}>
                                 <CardContent sx={{ height: '100%', color: '#FFF', }}>
                                     <Typography variant="h6" gutterBottom>Weather Details</Typography>
@@ -445,9 +507,9 @@ function App() {
                                             width: '100%',
                                             display: 'grid',
                                             gridTemplateColumns: {
-                                                xs: 'repeat(1, 1fr)', // 1 column on extra small screens
-                                                sm: 'repeat(2, 1fr)',  // 2 columns on small screens
-                                                md: 'repeat(3, 1fr)'   // 3 columns on medium screens
+                                                xs: 'repeat(1, 1fr)',
+                                                sm: 'repeat(2, 1fr)',
+                                                md: 'repeat(3, 1fr)'
                                             }
                                         }}>
                                             {[
@@ -459,8 +521,8 @@ function App() {
                                                 ['Max Temp', `${tempValue(weatherData.main.temp_max)}${tempUnit}`]
                                             ].map(([label, value]) => (
                                                 <Grid key={label} sx={{
-                                                    width: '100% !important', // Force full width of grid cell
-                                                    minWidth: 0, // Prevent overflow
+                                                    width: '100% !important',
+                                                    minWidth: 0,
                                                 }}>
                                                     <Card sx={{
                                                         height: '100%',
@@ -468,7 +530,7 @@ function App() {
                                                         color: '#000',
                                                         borderRadius: '16px',
                                                         display: 'flex',
-                                                        flexDirection: 'column'
+                                                        flexDirection: 'column',
                                                     }}>
                                                         <CardContent sx={{ flexGrow: 1 }}>
                                                             <Typography variant="subtitle1">{label}</Typography>
@@ -481,7 +543,7 @@ function App() {
 
                                     {/* Hourly Forecast Section */}
                                         <Box sx={{ width: '100%' }}>
-                                        <Typography variant="h6" gutterBottom>Next 24 Hours</Typography>
+                                            <Typography variant="h6" gutterBottom sx={{pt:1} }>Next 24 Hours</Typography>
                                         <Typography variant="p" sx={{ fontStyle: 'italic', color: '#808080',  }} gutterBottom>Updated in 3 hour intervals</Typography>
                                         <Box sx={{ display: 'flex', overflowX: 'auto', gap: 1, py: 1 }}>
                                             {hourlyForecast.map((hour, index) => (
@@ -491,7 +553,7 @@ function App() {
                                                             {new Date(hour.dt * 1000).toLocaleTimeString([], { hour: '2-digit' })}:00
                                                         </Typography>
                                                         <Avatar
-                                                            src={getMeteocon(hour.weather[0].icon)}  // Changed from weatherData to hour
+                                                            src={getMeteocon(hour.weather[0].icon)}
                                                             alt={hour.weather[0].description}
                                                             sx={{
                                                                 width: 80,
@@ -511,9 +573,12 @@ function App() {
                             </Card>
                         </Grid>
                     </Grid>
-                )}
+                    )}
+                    {/* AdSense ad unit will be placed here */}
+                    <AdPlaceholder height="90px" position="middle" />
 
-                {forecast.length > 0 && (
+                    {/* 5-day forecast - only shows when forecast data exists */}
+                    {forecast.length > 0 && (
                         <Paper elevation={3} sx={{
                             display: 'flex',
                             flexDirection: 'column',
@@ -521,9 +586,9 @@ function App() {
                             mt: 5,
                             backgroundColor: '#002471',
                             borderRadius: '16px',
-                            maxWidth: '1200px', // Match main paper width
-                            mx: 'auto', // Center horizontally
+                            mx: 'auto',
                         }}>
+
                         <Typography variant="h5" gutterBottom sx={{ color: '#FFF' }}>5-Day Forecast:</Typography>
                         <Grid container spacing={3} sx={{
                             justifyContent: 'center',
@@ -541,12 +606,12 @@ function App() {
                                                 })}
                                             </Typography>
                                             <Avatar
-                                                src={getMeteocon(day.weather[0].icon)}  // Changed from weatherData to day
+                                                src={getMeteocon(day.weather[0].icon)}
                                                 alt={day.weather[0].description}
                                                 sx={{
                                                     width: 135,
                                                     height: 90,
-                                                    backgroundColor: 'trasnparent'
+                                                    backgroundColor: 'transparent'
                                                 }}
                                             />
                                             <Typography variant="h6">
@@ -561,13 +626,56 @@ function App() {
                             ))}
                         </Grid>
                         </Paper>
-                )}
+                    )}
+
+                {/* Show error or prompt if no weather data */}
                 {!weatherData && !firstLoad && !loading && (
                     <Typography textAlign="center" color="text.secondary">
                         {error || "Search for a city to see weather information"}
                     </Typography>
                     )}
                 </Paper>
+
+                {/* AdSense ad unit will be placed here */}
+                <AdPlaceholder height="90px" position="bottom" />
+
+                <CookieConsent /> {/* Cookie consent dialog */}
+
+                {/* Site footer */}
+                <Box component="footer" sx={{
+                    mt: 25,
+                    py: 3,
+                    textAlign: 'center',
+                    borderTop: '1px solid rgba(255, 255, 255, 0.2)',
+                }}>
+                    <Typography variant="body2" color="#FFF" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        &copy; {new Date().getFullYear()} BarelyWeathery
+                        <span style={{ margin: '0 4px' }}>|</span>
+                        <Typography variant="body2" color="#FFF" component="span">
+                            <Link href="https://www.github.com/Synetraa1" target="_blank" rel="noopener noreferrer" style={{ color: '#fff', textDecoration: 'none' }}>
+                                My GitHub
+                            </Link>
+                        </Typography>
+                        <span style={{ margin: '0 4px' }}>|</span>
+                        <Link href="/privacy-policy" target="_blank" style={{ color: '#3f95ea', textDecoration: 'none' }}>
+                            Privacy Policy
+                        </Link>
+                        <span style={{ margin: '0 4px' }}>|</span>
+                        <Link href="/terms-of-service" target="_blank" style={{ color: '#3f95ea', textDecoration: 'none' }}>
+                            Terms of Service
+                        </Link>
+                        <span style={{ margin: '0 4px' }}>|</span>
+                        <Typography variant="body2" color="#FFF" component="span">
+                            Powered by <Link href="https://openweathermap.org/" target="_blank" rel="noopener noreferrer" style={{ color: '#3f95ea', textDecoration: 'none' }}>
+                                OpenWeatherMap
+                            </Link>
+                        </Typography>
+                        <span style={{ margin: '0 4px' }}>|</span>
+                        <Typography variant="body2" color="#FFF" component="span">
+                            Logo created with AI assistance
+                        </Typography>
+                    </Typography>
+                </Box>
                 </Container>
             </ThemeProvider>
     );
