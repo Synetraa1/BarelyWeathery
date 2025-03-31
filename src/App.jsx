@@ -639,7 +639,6 @@ function App() {
                 <AdPlaceholder height="90px" position="bottom" />
 
                 <CookieConsent /> {/* Cookie consent dialog */}
-                <SpeedInsights />
                 <Analytics/>
 
                 {/* Site footer */}
