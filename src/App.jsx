@@ -548,7 +548,7 @@ function App() {
                                                 <Card key={index} sx={{ minWidth: 100, borderRadius: '16px' }}>
                                                     <CardContent sx={{ textAlign: 'center',  }}>
                                                         <Typography variant="subtitle2">
-                                                            {new Date(hour.dt * 1000).toLocaleTimeString([], { hour: '2-digit' })}:00
+                                                                {new Date(hour.dt * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                         </Typography>
                                                         <Avatar
                                                             src={getMeteocon(hour.weather[0].icon)}
