@@ -2,7 +2,7 @@ export const getMeteocon = (openWeatherIconCode) => {
     const iconMap = {
         // Clear
         '01d': '/icons/clear-day.svg',
-        '01n': '/public/icons/clear-night.svg',
+        '01n': '/icons/clear-night.svg',
 
         // Clouds
         '02d': '/icons/partly-cloudy-day.svg',
