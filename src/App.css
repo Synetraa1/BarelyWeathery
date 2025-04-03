@@ -1,0 +1,18 @@
+/* Base styles */
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    background: linear-gradient(180deg, #272727 0%, #002471 100%);
+    color: white;
+}
+
+/* Ensure full height layout */
+#root {
+    width: 100%;
+}
+
+/* Make cards equal height */
+.MuiGrid-item {
+    display: flex;
+}
