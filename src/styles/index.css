@@ -1,0 +1,33 @@
+@font-face {
+    font-family: 'Roboto';
+    font-style: normal;
+    font-weight: 100 900; /* This means it supports all weights from 100 to 900 */
+    src: url('/font/Roboto-VariableFont_wdth.wght') format('truetype-variations');
+  }
+  
+  @font-face {
+    font-family: 'Roboto';
+    font-style: italic;
+    font-weight: 100 900;
+    src: url('/font/Roboto-Italic-VariableFont_wdth.wght') format('truetype-variations');
+  }
+
+:root {
+    font-family: 'Roboto', Arial, sans-serif; 
+    line-height: 1.5;
+    font-weight: 400;
+    background: linear-gradient(180deg, #272727 0%, #002471 100%);
+}
+
+body {
+    margin: 0;
+    display: flex;
+    place-items: center;
+    min-width: 320px;
+    min-height: 100vh;
+    font-family: inherit; /* Ensures inheritance */
+}
+
+* {
+    font-family: inherit; /* Force inheritance on all elements */
+}

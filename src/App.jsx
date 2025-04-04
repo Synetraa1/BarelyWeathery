@@ -7,22 +7,15 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import LocationSearchingIcon from '@mui/icons-material/LocationSearching';
-import './App.css';
+import './styles/App.css';
 import Autocomplete from '@mui/material/Autocomplete';
-import { getMeteocon } from '@/utils/weatherIcons';
-import { createTheme, ThemeProvider } from '@mui/material/styles'
+import { getMeteocon } from './utils/weatherIcons'; // Adjusted path
+import { ThemeProvider } from '@mui/material/styles';
 import { Analytics } from "@vercel/analytics/react";
-import CookieConsent from './CookieConsent';
-
-const theme = createTheme({
-    typography: {
-        fontFamily: [
-            'Roboto', // The chosen font
-            'Arial', // Fallback
-            'sans-serif'
-        ].join(','),
-    },
-});
+import CookieConsent from './components/CookieConsent';
+import Navbar from './components/navbar'; // Make sure the path matches your file structure
+import AdPlaceholder from './components/AdPlaceholer';
+import constants from './contexts/constants'; // Adjusted path
 
 function App() {
     // Weather data API key from environment variables
@@ -33,14 +26,11 @@ function App() {
     const [forecast, setForecast] = useState([]);
     const [hourlyForecast, setHourlyForecast] = useState([]);
     const [city, setCity] = useState("");
-    const [inputValue, setInputValue] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [unitSystem, setUnitSystem] = useState('metric');
     const [useCurrentLocation, setUseCurrentLocation] = useState(true);
     const [firstLoad, setFirstLoad] = useState(true);
-    const [citySuggestions, setCitySuggestions] = useState([]);
-    const [isSuggestionsOpen, setIsSuggestionsOpen] = useState(false);
 
     // Check if we're in development mode
     const isDevelopment = import.meta.env.MODE === 'development';
@@ -111,20 +101,6 @@ function App() {
         }
     }, [API_KEY, unitSystem]);
 
-    const fetchCitySuggestions = useCallback(async (query) => {
-        if (query.length < 2) return [];
-        try {
-            const response = await fetch(
-                `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?types=place&access_token=${import.meta.env.VITE_MAPBOX_API_KEY}&limit=5`
-            );
-            const data = await response.json();
-            return data.features.map(feature => feature.place_name);
-        } catch (error) {
-            console.error('Error fetching suggestions:', error);
-            return [];
-        }
-    }, []);
-
     const fetchWeather = useCallback(() => {
         if (useCurrentLocation) {
             if (isDevelopment) {
@@ -145,12 +121,13 @@ function App() {
         }
     }, [useCurrentLocation, city, isDevelopment, fetchWeatherByCoords, fetchWeatherByCity]);
 
-    const handleLocationToggle = () => {
-        setUseCurrentLocation(!useCurrentLocation);
-        if (!useCurrentLocation) {
-            setInputValue("");
+    // This handler will be triggered when search is submitted from Navbar
+    const handleCitySearch = useCallback((cityName) => {
+        if (cityName) {
+            setUseCurrentLocation(false); // Disable location when searching
+            fetchWeatherByCity(cityName);
         }
-    };
+    }, [fetchWeatherByCity]);
 
     useEffect(() => {
         if (firstLoad) {
@@ -164,55 +141,9 @@ function App() {
         }
     }, [firstLoad, useCurrentLocation, unitSystem, fetchWeather]);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const trimmedValue = inputValue.trim();
-        if (trimmedValue) {
-            setUseCurrentLocation(false);
-            fetchWeatherByCity(trimmedValue);
-            setInputValue("");
-        }
-    };
-
-    // Ad placeholder component - will be replaced with actual ads later
-    const AdPlaceholder = ({ width, height, }) => {
-        return (
-            <Box
-                sx={{
-                    width: width || '100%',
-                    height: height || '90px',
-                    backgroundColor: 'rgba(200, 200, 200, 0.1)',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    my: 2,
-                    border: '1px dashed rgba(255, 255, 255, 0.2)',
-                    borderRadius: '8px',
-                    position: 'relative',
-                    overflow: 'hidden'
-                }}
-            >
-                <Typography variant="caption" color="rgba(255, 255, 255, 0.5)">
-                    Advertisement
-                </Typography>
-            </Box>
-        );
-    };
-
-    // Convert wind speed based on unit system selected
-    const convertWindSpeed = (speed, unitSystem) => {
-        if (unitSystem === 'metric') {
-            // API gives m/s for metric, but we want km/h for display
-            return Math.round(speed * 3.6);
-        }
-        // Already in mph for imperial
-        return Math.round(speed);
-    };
-
-    // Temperature unit symbol and formatting
-    const tempUnit = unitSystem === 'metric' ? String.fromCharCode(176) + 'C' : String.fromCharCode(176) + 'F';
-    const speedUnit = unitSystem === 'metric' ? 'kph' : 'mph';
-    const tempValue = (temp) => Math.round(temp);
+    // Get unit values from constants
+    const { tempUnit, speedUnit } = constants.getUnits(unitSystem);
+    const { tempValue, convertWindSpeed } = constants;
 
     // Show loading screen on first load
     if (loading && firstLoad) {
@@ -221,16 +152,25 @@ function App() {
                 <CircularProgress />
                 <Typography sx={{ ml: 2 }}>Detecting your location...</Typography>
             </Container>
-                );
-
-                }
+        );
+    }
 
     // Main component render
     return (
-
-        <ThemeProvider theme={theme}>
+        <>
+        <Navbar 
+            unitSystem={unitSystem} 
+            setUnitSystem={setUnitSystem} 
+            city={city}
+            setCity={setCity}
+            useCurrentLocation={useCurrentLocation}
+            setUseCurrentLocation={setUseCurrentLocation}
+            onSearch={handleCitySearch}
+        />
+        <ThemeProvider theme={constants.theme}>
             <Container maxWidth="xxl" sx={{
-                py: 1,
+                pt: 8, // Add padding to account for fixed navbar
+                pb: 1,
                 px: { xs: 2, md: 4 },
                 display: 'flex',
                 flexDirection: 'column',
@@ -242,215 +182,13 @@ function App() {
                 <Paper elevation={3} sx={{
                     p: { xs: 0, md: 5 },
                     mb: 4,
+                    mt:4,
                     backgroundColor: { xs: 'transparent', md: 'transparent', lg:'#636363' },
                     mx: 'auto',
                     maxWidth: '1400px',
                     width: '100%', 
                     borderRadius: '16px',
                 }}>
-                <Box sx={{
-                    display: 'flex',
-                    flexDirection: { xs: 'column', md: 'row' },
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    mb: 2,
-                }}>
-                {/* Header Section */}
-                <Box sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    mb: 2,
-                    mt:1,
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: '16px',
-                    backgroundColor: 'rgba(0, 0, 0, 0.2)', 
-                    width: '100%',
-                    mx: 'auto'
-                        }}>
-                            {/* Top Row - Logo*/}
-                            <Box sx={{
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                mb: useCurrentLocation && weatherData ? 2 : 0
-                            }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 2, md: 0 } }}>
-                                    <img
-                                        alt="BarelyWeathery Logo"
-                                        src="/Logo.png"
-                                        style={{
-                                            height: '100px',
-                                            width: 'auto',
-                                            maxWidth: '300px',
-                                            marginTop:'16px',
-                                        }}
-                                    />
-                                </Box>
-                            </Box>
-                    {/* Location Message (appears below logo when using current location) */}
-                            {useCurrentLocation && weatherData && (
-                                <Typography
-                                    variant="body1"
-                                    sx={{
-                                        color: 'rgba(255, 255, 255, 0.8)',
-                                        textAlign: 'center',
-                                        mt: 1,
-                                        width: '100%',
-                                        fontSize:'20px'
-                                    }}
-                                >
-                                    Showing weather for your approximate location: <strong>{city}</strong>
-                                </Typography>
-                            )}
-
-                            {!useCurrentLocation && (
-                                <Box
-                                    component="form"
-                                    onSubmit={handleSubmit}
-                                    sx={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        gap: 2,
-                                        mt: 3,
-                                        width: '100%',
-                                    }}
-                                >
-                                    <Autocomplete
-                                        sx={{ width: '80%' }}
-                                        freeSolo
-                                        options={citySuggestions}
-                                        open={isSuggestionsOpen}
-                                        onOpen={() => setIsSuggestionsOpen(true)}
-                                        onClose={() => setIsSuggestionsOpen(false)}
-                                        onInputChange={async (event, newValue) => {
-                                            setInputValue(newValue);
-                                            if (newValue.length > 1) {
-                                                const suggestions = await fetchCitySuggestions(newValue);
-                                                setCitySuggestions(suggestions);
-                                            } else {
-                                                setCitySuggestions([]);
-                                            }
-                                        }}
-                                        inputValue={inputValue}
-                                        onChange={(event, newValue) => {
-                                            if (newValue) {
-                                                setCity(newValue.split(',')[0]);
-                                                setInputValue("");
-                                                fetchWeatherByCity(newValue.split(',')[0]);
-                                            }
-                                        }}
-                                        renderInput={(params) => (
-                                            <TextField
-                                                {...params}
-                                                fullWidth
-                                                label="Enter city name"
-                                                placeholder="E.g London, New York, Tokyo"
-                                                variant="outlined"
-                                                error={!!error}
-                                                helperText={error}
-                                                sx={{
-                                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                                                    '& .MuiOutlinedInput-root': {
-                                                        '& fieldset': {
-                                                            borderColor: 'rgba(255, 255, 255, 0.2)',
-                                                        },
-                                                        '&:hover fieldset': {
-                                                            borderColor: 'rgba(255, 255, 255, 0.4)',
-                                                        },
-                                                        '&.Mui-focused fieldset': {
-                                                            borderColor: 'white',
-                                                        },
-                                                        '& .MuiOutlinedInput-input::placeholder': {
-                                                            color: 'rgba(255, 255, 255, 0.6)',
-                                                            opacity: 1,
-                                                        },
-                                                    },
-                                                    '& .MuiInputLabel-root': {
-                                                        color: 'white',
-                                                        '&.Mui-focused': {
-                                                            color: 'white',
-                                                        },
-                                                    },
-                                                }}
-                                            />
-                                        )}
-                                    />
-                                    <Button
-                                        type="submit"
-                                        variant="contained"
-                                        size="large"
-                                        startIcon={<SearchIcon />}
-                                        sx={{ height: '56px' }}
-                                        disabled={!inputValue.trim()}
-                                    >
-                                        Search
-                                    </Button>
-                                </Box>
-                            )}
-                            <Box sx={{
-                                display: 'flex',
-                                justifyContent: 'center',
-                                gap: 2,
-                                mt: 2,
-                                mb:2,
-                                width: '100%',
-                                flexWrap: 'wrap',
-                                px: { xs: 0, sm: 0 },
-                            }}>
-                                <Tooltip title={useCurrentLocation ? "Search for specific cities" : "Use your location"}>
-                                    <Button
-                                        variant='contained'
-                                        color={useCurrentLocation ? "primary" : "primary"}
-                                        onClick={handleLocationToggle}
-                                        startIcon={useCurrentLocation ? <MyLocationIcon /> : <LocationSearchingIcon />}
-                                    >
-                                        {useCurrentLocation ? 'Search City' : 'Location'}
-                                    </Button>
-                                </Tooltip>
-
-                                <FormControl size="small" sx={{ minWidth: 100, color: '#FFF',}}>
-                                    <InputLabel>Units</InputLabel>
-                                    <Select
-                                        value={unitSystem}
-                                        onChange={(e) => setUnitSystem(e.target.value)}
-                                        label="Units"
-                                        sx={{ color: '#FFF' }}
-                                    >
-                                        <MenuItem value="metric">{`Metric (${String.fromCharCode(176)}C)`}</MenuItem>
-                                        <MenuItem value="imperial">{`Imperial (${String.fromCharCode(176)}F)`}</MenuItem>
-                                    </Select>
-                                </FormControl>
-                            </Box>
-                            <Box sx={{
-                                display: 'flex',
-                                justifyContent: 'center',
-                                mt: { xs: 0, sm: 0 }
-                            }}>
-                                <Tooltip title="About BarelyWeathery">
-                                    <Button
-                                        variant="fill"
-                                        color="primary"
-                                        component={Link}
-                                        href="/About"
-                                        target="_blank"
-                                        sx={{
-                                            borderColor: 'rgba(255, 255, 255, 0.3)',
-                                            color: 'white',
-                                            '&:hover': {
-                                                borderColor: 'white',
-                                                backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                                            }
-                                        }}
-                                    >
-                                        Read More about BarelyWeatherly
-                                    </Button>
-                                </Tooltip>
-                            </Box>
-                        </Box>
-                    </Box>
-                    {/* AdSense ad unit will be placed here */}
-                    <AdPlaceholder height="90px" position="top" />
 
                 {/* Weather display grid - only shows when data is loaded */}
                 {weatherData && (
@@ -458,8 +196,6 @@ function App() {
                             width: '100%',
                             mb: 4,
                             justifyContent: 'flex-start',
-                            
-                            
                         }}>
                             {/* Current weather in weather card */}
                             <Grid sx={{ width: { xs: '100%', md: '100%', lg: '25%', } }}>
@@ -543,7 +279,20 @@ function App() {
                                         <Box sx={{ width: '100%' }}>
                                             <Typography variant="h6" gutterBottom sx={{pt:1} }>Next 24 Hours</Typography>
                                         <Typography variant="p" sx={{ fontStyle: 'italic', color: '#808080',  }} gutterBottom>Updated in 3 hour intervals</Typography>
-                                        <Box sx={{ display: 'flex', overflowX: 'auto', gap: 1, py: 1 }}>
+                                        <Box sx={{ 
+                                        display: 'flex', 
+                                        overflowX: 'auto', 
+                                        gap: 1, 
+                                        py: 1,
+                                        WebkitOverflowScrolling: 'touch', // Smooth scrolling on iOS
+                                        '&::-webkit-scrollbar': {
+                                            height: '6px'
+                                        },
+                                        '&::-webkit-scrollbar-thumb': {
+                                            backgroundColor: 'rgba(255,255,255,0.2)',
+                                            borderRadius: '3px'
+                                        }
+                                        }}>
                                             {hourlyForecast.map((hour, index) => (
                                                 <Card key={index} sx={{ minWidth: 100, borderRadius: '16px' }}>
                                                     <CardContent sx={{ textAlign: 'center',  }}>
@@ -572,8 +321,7 @@ function App() {
                         </Grid>
                     </Grid>
                     )}
-                    {/* AdSense ad unit will be placed here */}
-                    <AdPlaceholder height="90px" position="middle" />
+
 
                     {/* 5-day forecast - only shows when forecast data exists */}
                     {forecast.length > 0 && (
@@ -596,7 +344,7 @@ function App() {
                                 <Grid key={index} sx={{width: { xs: '100%', md: 'auto' },
                                     maxWidth: { xs: '100%', md: 'none' },
                                 }}>
-                                    <Card sx={{ textAlign: 'center', borderRadius: '16px', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                                    <Card sx={{ textAlign: 'center', borderRadius: '16px', justifyContent: 'center', alignItems: 'center', height: '100%', mx:'auto' }}>
                                         <CardContent>
                                             <Typography variant="subtitle1">
                                                 {new Date(day.dt * 1000).toLocaleDateString("en-GB", {
@@ -633,9 +381,6 @@ function App() {
                     </Typography>
                     )}
                 </Paper>
-
-                {/* AdSense ad unit will be placed here */}
-                <AdPlaceholder height="150px" position="bottom" />
 
                 <CookieConsent /> {/* Cookie consent dialog */}
                 <Analytics/>
@@ -676,7 +421,9 @@ function App() {
                     </Typography>
                 </Box>
                 </Container>
+                
             </ThemeProvider>
+            </>
     );
 }
 

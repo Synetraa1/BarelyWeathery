@@ -1,0 +1,29 @@
+html, body {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    justify-content:center;
+    align-items:center;
+}
+
+* {
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+.word-break {
+    word-break: break-word;
+}
+
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
