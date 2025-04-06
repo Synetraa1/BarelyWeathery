@@ -1,29 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { 
-  Box, 
-  Button, 
-  TextField, 
-  MenuItem, 
-  Select, 
-  FormControl, 
-  InputLabel, 
-  Link, 
-  Tooltip, 
-  InputAdornment,
-  Autocomplete,
-  CircularProgress,
-  Paper,
-  Typography,
-  Drawer,
-  IconButton,
-  useMediaQuery,
-  useTheme,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Divider,
-  ListItemButton
+    Box, 
+    Button, 
+    TextField, 
+    MenuItem, 
+    Select, 
+    FormControl, 
+    InputLabel, 
+    Link, 
+    Tooltip, 
+    InputAdornment,
+    Autocomplete,
+    CircularProgress,
+    Typography,
+    Drawer,
+    IconButton,
+    useMediaQuery,
+    useTheme,
+    List,
+    ListItem,
+    ListItemIcon,
+    ListItemText,
+    Divider,
+    ListItemButton
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
@@ -32,17 +31,25 @@ import CloseIcon from '@mui/icons-material/Close';
 import InfoIcon from '@mui/icons-material/Info';
 import WbSunnyIcon from '@mui/icons-material/WbSunny';
 
-const Navbar = ({ unitSystem, setUnitSystem, setCity, useCurrentLocation, setUseCurrentLocation, onSearch }) => {
-    const [searchValue, setSearchValue] = useState("");
+const Navbar = ({ 
+    unitSystem, 
+    setUnitSystem, 
+    setCity, 
+    useCurrentLocation, 
+    setUseCurrentLocation, 
+    onSearch 
+}) => {
+    const [searchValue, setSearchValue] = useState(null);
     const [inputValue, setInputValue] = useState("");
     const [options, setOptions] = useState([]);
     const [loading, setLoading] = useState(false);
     const [drawerOpen, setDrawerOpen] = useState(false);
+    const autocompleteRef = useRef(null);
     
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('md'));
     
-    // Common button style with consistent dimensions
+    // Button styles
     const buttonStyle = {
         width: '40px',
         height: '40px',
@@ -65,25 +72,32 @@ const Navbar = ({ unitSystem, setUnitSystem, setCity, useCurrentLocation, setUse
         alignItems: 'center'
     };
 
-    const handleSearch = (e) => {
-        e.preventDefault();
-        if (searchValue) {
-            const cityName = typeof searchValue === 'string' ? searchValue : searchValue.name;
+    // Search handler
+    const handleSearch = useCallback((selectedValue) => {
+        const cityName = selectedValue 
+            ? (typeof selectedValue === 'string' 
+                ? selectedValue 
+                : (selectedValue.name || selectedValue.fullName))
+            : inputValue;
+
+        if (cityName) {
             setCity(cityName);
             if (onSearch) onSearch(cityName);
-            setDrawerOpen(false); // Close drawer after search on mobile
+            setDrawerOpen(false);
         }
-    };
-    
+    }, [inputValue, setCity, onSearch]);
+
+    // Location toggle handler
     const handleLocationToggle = () => {
         if (!useCurrentLocation) {
-            setSearchValue("");
+            setSearchValue(null);
             setInputValue("");
         }
         setUseCurrentLocation(!useCurrentLocation);
-        if (isMobile) setDrawerOpen(false); // Close drawer after location toggle on mobile
+        if (isMobile) setDrawerOpen(false);
     };
 
+    // Drawer toggle
     const toggleDrawer = (open) => (event) => {
         if (event && event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
             return;
@@ -91,10 +105,10 @@ const Navbar = ({ unitSystem, setUnitSystem, setCity, useCurrentLocation, setUse
         setDrawerOpen(open);
     };
 
+    // Place search effect
     useEffect(() => {
         let active = true;
         const MAPBOX_API_KEY = import.meta.env.VITE_MAPBOX_API_KEY;
-        console.log("API Key available:", !!MAPBOX_API_KEY);
 
         if (inputValue === '') {
             setOptions([]);
@@ -103,126 +117,127 @@ const Navbar = ({ unitSystem, setUnitSystem, setCity, useCurrentLocation, setUse
 
         setLoading(true);
 
-        // Direct implementation using fetch
-        const fetchPlaces = async () => {
-            try {
-                const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(inputValue)}.json?access_token=${MAPBOX_API_KEY}&types=place&limit=5`;
-                console.log("Fetching from Mapbox:", url.replace(MAPBOX_API_KEY, "API_KEY_HIDDEN"));
-                
-                const response = await fetch(url);
-                const data = await response.json();
-                
-                console.log("Mapbox response:", data);
-                
-                if (active && data.features) {
-                    // Format the results for the Autocomplete component
-                    const results = data.features.map(place => ({
-                        name: place.text,
-                        fullName: place.place_name,
-                        id: place.id
-                    }));
+        // Debounced API call
+        const timeoutId = setTimeout(() => {
+            const fetchPlaces = async () => {
+                try {
+                    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(inputValue)}.json?access_token=${MAPBOX_API_KEY}&types=place&limit=5`;
                     
-                    console.log("Formatted results:", results);
-                    setOptions(results);
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    
+                    if (active && data.features) {
+                        const results = data.features.map(place => ({
+                            name: place.text,
+                            fullName: place.place_name,
+                            id: place.id
+                        }));
+                        
+                        setOptions(results);
+                    }
+                } catch (error) {
+                    console.error("Error fetching places:", error);
+                    setOptions([]);
+                } finally {
+                    setLoading(false);
                 }
-            } catch (error) {
-                console.error("Error fetching places:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
+            };
 
-        // Only fetch if we have at least 2 characters
-        if (inputValue.length >= 2) {
             fetchPlaces();
-        } else {
-            setLoading(false);
-            setOptions([]);
-        }
+        }, 500);
 
         return () => {
             active = false;
+            clearTimeout(timeoutId);
         };
     }, [inputValue]);
 
-    // Custom TextField component correctly configured for MUI v7
-    const CustomTextField = React.forwardRef((props, ref) => {
-        const { InputProps, inputProps, ...other } = props;
-
-        return (
-            <TextField
-                {...other}
-                inputProps={{
-                    ...inputProps,
-                    autoComplete: "off"  // Helps with mobile input issues
-                }}
-                ref={ref}
-                InputProps={{
-                    ...InputProps,
-                    startAdornment: (
-                        <InputAdornment position="start">
-                            <SearchIcon sx={{ color: isMobile && drawerOpen ? '#0034a4' : 'white' }} />
-                        </InputAdornment>
-                    ),
-                    endAdornment: (
-                        <>
-                            {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                            {InputProps?.endAdornment}
-                        </>
-                    )
-                }}
-                sx={{ 
-                    '& .MuiInputBase-root': {
-                        color: isMobile && drawerOpen ? '#0034a4' : 'white',
-                        backgroundColor: isMobile && drawerOpen ? 'white' : 'rgba(255, 255, 255, 0.1)',
-                        '& .MuiOutlinedInput-notchedOutline': {
-                            borderColor: isMobile && drawerOpen ? '#0034a4' : 'rgba(255, 255, 255, 0.3)'
-                        },
-                        '&:hover .MuiOutlinedInput-notchedOutline': {
-                            borderColor: isMobile && drawerOpen ? '#0034a4' : 'rgba(255, 255, 255, 0.5)'
-                        },
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: isMobile && drawerOpen ? '#0034a4' : 'white'
-                        }
-                    }
-                }}
-            />
-        );
-    });
-
-    // Search form component to reuse in both mobile and desktop views
+    // Search form component
     const SearchForm = ({ fullWidth = false }) => (
-        <form onSubmit={handleSearch} style={{ display: 'flex', width: fullWidth ? '100%' : '100%', maxWidth: fullWidth ? '100%' : '500px' }}>
+        <form 
+            onSubmit={(e) => {
+                e.preventDefault();
+                handleSearch(searchValue);
+            }} 
+            style={{ 
+                display: 'flex', 
+                width: fullWidth ? '100%' : '100%', 
+                maxWidth: fullWidth ? '100%' : '500px' 
+            }}
+        >
             <Autocomplete
+                ref={autocompleteRef}
                 id="mapbox-places-autocomplete"
                 sx={{ width: '100%' }}
                 freeSolo
-                filterOptions={(x) => x} // Don't filter options - Mapbox does this already
+                clearOnBlur={false}
+                disableClearable
+                filterOptions={(x) => x}
                 options={options}
                 loading={loading}
                 getOptionLabel={(option) => {
-                    // Handle both string inputs and option objects
-                    return typeof option === 'string' ? option : option.name;
+                    if (!option) return '';
+                    return typeof option === 'string' 
+                        ? option 
+                        : (option.fullName || option.name || '');
                 }}
                 value={searchValue}
-                onChange={(event, newValue) => {
-                    console.log("Selection changed:", newValue);
-                    setSearchValue(newValue);
+                onChange={(event, newValue, reason) => {
+                    if (reason === 'selectOption') {
+                        setSearchValue(newValue);
+                        if (newValue && typeof newValue !== 'string') {
+                            setInputValue(newValue.name || newValue.fullName);
+                        }
+                    } else if (reason === 'clear') {
+                        setSearchValue(null);
+                        setInputValue('');
+                    }
                 }}
                 inputValue={inputValue}
-                onInputChange={(event, newInputValue) => {
-                    setInputValue(newInputValue);
+                onInputChange={(event, newInputValue, reason) => {
+                    if (reason === 'input') {
+                        setInputValue(newInputValue);
+                        setSearchValue(newInputValue); // Add this line to sync searchValue
+                    }
                 }}
                 renderInput={(params) => (
-                    <CustomTextField
+                    <TextField
                         {...params}
                         placeholder="Search for a city..."
                         variant="outlined"
                         size="small"
+                        InputProps={{
+                            ...params.InputProps,
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <SearchIcon sx={{ color: isMobile && drawerOpen ? '#0034a4' : 'white' }} />
+                                </InputAdornment>
+                            ),
+                            endAdornment: (
+                                <>
+                                    {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                    {params.InputProps.endAdornment}
+                                </>
+                            )
+                        }}
+                        sx={{ 
+                            '& .MuiInputBase-root': {
+                                backgroundColor: isMobile && drawerOpen ? 'white' : 'rgba(255, 255, 255, 0.1)',
+                                '& .MuiOutlinedInput-notchedOutline': {
+                                    borderColor: isMobile && drawerOpen ? '#0034a4' : 'rgba(255, 255, 255, 0.3)'
+                                },
+                                '&:hover .MuiOutlinedInput-notchedOutline': {
+                                    borderColor: isMobile && drawerOpen ? '#0034a4' : 'rgba(255, 255, 255, 0.5)'
+                                },
+                                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                    borderColor: isMobile && drawerOpen ? '#0034a4' : 'white'
+                                }
+                            }
+                        }}
                     />
                 )}
                 renderOption={(props, option) => (
-                    <li {...props} key={option.id}>
+                    <li {...props} key={option.id || option.name}>
                         <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                             <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
                                 {option.name}
@@ -233,22 +248,8 @@ const Navbar = ({ unitSystem, setUnitSystem, setCity, useCurrentLocation, setUse
                         </Box>
                     </li>
                 )}
-                PaperComponent={(props) => (
-                    <Paper 
-                        {...props} 
-                        elevation={4}
-                        sx={{ 
-                            backgroundColor: '#fff',
-                            mt: 1,
-                            zIndex: 1500
-                        }} 
-                    />
-                )}
                 noOptionsText="No locations found"
                 loadingText="Searching..."
-                // Fix for mobile keyboard focus issues
-                disablePortal
-                clearOnEscape
             />
             <Button
                 type="submit"
@@ -265,7 +266,7 @@ const Navbar = ({ unitSystem, setUnitSystem, setCity, useCurrentLocation, setUse
         </form>
     );
 
-    // Drawer content for mobile view
+    // Drawer content for mobile
     const drawerContent = (
         <Box
             sx={{
@@ -348,7 +349,7 @@ const Navbar = ({ unitSystem, setUnitSystem, setCity, useCurrentLocation, setUse
                 boxSizing: 'border-box',
             }}
         >
-            {/* Logo - visible in both mobile and desktop */}
+            {/* Logo */}
             <Box>
                 <img
                     alt="BarelyWeathery Logo"
@@ -363,7 +364,7 @@ const Navbar = ({ unitSystem, setUnitSystem, setCity, useCurrentLocation, setUse
             {/* Spacer for mobile view */}
             {isMobile && <Box sx={{ flex: 1 }} />}
 
-            {/* Desktop layout - hidden on mobile */}
+            {/* Desktop layout */}
             {!isMobile && (
                 <>
                     <Box sx={{ 
@@ -411,7 +412,7 @@ const Navbar = ({ unitSystem, setUnitSystem, setCity, useCurrentLocation, setUse
                             </Button>
                         </Tooltip>
                         <FormControl size="small" sx={{ minWidth: 100, color: '#FFF' }}>
-                            <InputLabel>Units</InputLabel>
+                            <InputLabel sx={{ color: 'white' }}>Units</InputLabel>
                             <Select
                                 value={unitSystem}
                                 onChange={(e) => setUnitSystem(e.target.value)}
@@ -426,7 +427,7 @@ const Navbar = ({ unitSystem, setUnitSystem, setCity, useCurrentLocation, setUse
                 </>
             )}
             
-            {/* Burger menu icon - only visible on mobile, placed at the right */}
+            {/* Burger menu icon for mobile */}
             {isMobile && (
                 <IconButton 
                     color="inherit" 

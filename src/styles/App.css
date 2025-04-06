@@ -1,29 +1,145 @@
 html, body {
     width: 100%;
-    max-width: 100vw;
-    overflow-x: hidden;
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    overflow-x: hidden;
     justify-content:center;
-    align-items:center;
 }
 
+/* Box sizing inheritance */
 * {
+    box-sizing: inherit;
     -webkit-overflow-scrolling: touch;
-    box-sizing: border-box;
 }
 
+/* Responsive images */
 img {
     max-width: 100%;
     height: auto;
+    display: block;
 }
 
+/* Word breaking */
 .word-break {
     word-break: break-word;
+    overflow-wrap: break-word;
 }
 
-html, body {
-    max-width: 100%;
-    overflow-x: hidden;
+/* Scrollable containers */
+.scrollable-container {
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+}
+
+.scrollable-container::-webkit-scrollbar {
+    height: 6px;
+}
+
+.scrollable-container::-webkit-scrollbar-thumb {
+    background-color: rgba(255,255,255,0.3);
+    border-radius: 3px;
+}
+
+/* Base card styles */
+.weather-details-card {
+    background-color: #FFF;
+    color: #000;
+    border-radius: 16px;
+    width: 100%;
+    margin-bottom: 8px;
+    overflow: visible;
+    height: 100px; /* Fixed height for weather detail cards */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.hourly-forecast-card {
+    flex: 0 0 auto;
+    min-width: 110px; /* Consistent minimum width */
+    height: 160px; /* Fixed height for hourly cards */
+    border-radius: 16px;
+    margin: 0;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.forecast-day-card {
+    overflow: visible;
+    flex: 0 0 auto;
+    min-width: 140px; /* Consistent minimum width */
+    height: 250px; /* Fixed height for daily forecast cards */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Card content alignment */
+.card-content-center {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    height: 100% !important;
+    padding: 12px !important;
+}
+
+/* Fix MUI CardContent padding */
+.MuiCardContent-root {
+    padding: 16px !important;
+}
+
+.MuiCardContent-root:last-child {
+    padding-bottom: 16px !important;
+}
+
+/* Equal heights container */
+.equal-height-container {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.equal-height-container > * {
+    height: 100%;
+}
+
+/* Forecast scroll container */
+.forecast-scroll-container {
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+    padding: 8px 4px;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile fixes */
+@media (max-width: 600px) {
+    .MuiContainer-root {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
+    }
+   
+    .scrollable-container {
+        padding-left: 4px;
+        padding-right: 4px;
+    }
+    
+    .weather-details-card {
+        height: 90px; /* Slightly smaller on mobile */
+    }
+    
+    .hourly-forecast-card {
+        height: 140px; /* Slightly smaller on mobile */
+        min-width: 100px; /* Slightly smaller width on mobile */
+    }
+    
+    .forecast-day-card {
+        height: 200px; /* Slightly smaller on mobile */
+        min-width: 130px; /* Slightly smaller width on mobile */
+    }
 }
