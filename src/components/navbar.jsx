@@ -130,7 +130,7 @@ const Navbar = ({
       
       setCity(searchValue.trim());
       if (onSearch) onSearch(searchValue.trim());
-      setUseCurrentLocation(false);
+      setUseCurrentLocation(false); // Explicitly set to false
       setSearchValue('');
       setOptions([]);
     }
@@ -153,26 +153,49 @@ const Navbar = ({
 
   // Location handler
   const handleLocationToggle = () => {
-    // Always close the drawer immediately when requesting location
-    if (isMobile) {
-      setDrawerOpen(false);
-    }
 
+  
+    // If turning on location
     if (!useCurrentLocation) {
       setSearchValue('');
+      setUseCurrentLocation(true);
+      
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+            // You might want to reverse geocode here to get the city name
+            // For example:
+            fetchCityFromCoords(latitude, longitude);
+          },
+          (error) => {
+            console.error("Error getting location:", error);
+            setUseCurrentLocation(false); // Revert if error
+          }
+        );
+      }
+    } else {
+      // Turning off location
+      setUseCurrentLocation(false);
     }
-    setUseCurrentLocation(!useCurrentLocation);
-    
-    if (navigator.geolocation && !useCurrentLocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          // Any additional logic needed when location is obtained
-        },
-        (error) => {
-          console.error("Error getting location:", error);
-        }
-      );
+  };
+  
+  // Add this function to fetch city name from coordinates
+  const fetchCityFromCoords = async (lat, lon) => {
+    try {
+      const MAPBOX_API_KEY = import.meta.env.VITE_MAPBOX_API_KEY;
+      const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lon},${lat}.json?access_token=${MAPBOX_API_KEY}&types=place&limit=1`;
+      
+      const response = await fetch(url);
+      const data = await response.json();
+      
+      if (data.features && data.features.length > 0) {
+        const cityName = data.features[0].text;
+        setCity(cityName);
+        if (onSearch) onSearch(cityName);
+      }
+    } catch (error) {
+      console.error("Error fetching city from coordinates:", error);
     }
   };
 
@@ -316,7 +339,7 @@ const Navbar = ({
             <LocationOnIcon color={useCurrentLocation ? "success" : "primary"} />
           </ListItemIcon>
           <ListItemText 
-            primary={useCurrentLocation ? "Using Current Location" : "Use My Location"} 
+            primary={useCurrentLocation ? "Using Current Location, click to enable search" : "Use My Location"} 
           />
         </ListItemButton>
         
@@ -481,14 +504,14 @@ const Navbar = ({
             </ClickAwayListener>
 
             {/* Location button - always visible */}
-            <Tooltip title={useCurrentLocation ? "Currently using your location" : "Use your location"}>
+            <Tooltip title={useCurrentLocation ? "Currently using your location, click to enable search" : "Use your location"}>
                 <IconButton
                     onClick={handleLocationToggle}
                     sx={{
                     ...buttonStyle,
-                    backgroundColor: useCurrentLocation ? '#32CD32' : '#FFF',
+                    backgroundColor: useCurrentLocation ? '#90EE90' : '#FFF',
                     '&:hover': {
-                        backgroundColor: useCurrentLocation ? '#808080' : '#808080'
+                        backgroundColor: useCurrentLocation ? '#EEE' : '#EEE'
                     }
                     }}
                 >
