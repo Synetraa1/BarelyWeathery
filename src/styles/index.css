@@ -1,16 +1,9 @@
 @font-face {
-    font-family: 'Roboto';
-    font-style: normal;
-    font-weight: 100 900; /* This means it supports all weights from 100 to 900 */
-    src: url('/font/Roboto-VariableFont_wdth.wght') format('truetype-variations');
-  }
-  
-  @font-face {
-    font-family: 'Roboto';
-    font-style: italic;
-    font-weight: 100 900;
-    src: url('/font/Roboto-Italic-VariableFont_wdth.wght') format('truetype-variations');
-  }
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/font/Roboto-Regular.ttf') format('truetype');
+}
 
 :root {
     font-family: 'Roboto', Arial, sans-serif; 

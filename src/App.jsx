@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useEffect } from 'react';
 import {
-    TextField, Button, Box, Container, Typography, Paper,
+    Box, Container, Typography, Paper,
     CircularProgress, Grid, Card, CardContent, Avatar,
-    MenuItem, Select, FormControl, InputLabel, IconButton, Tooltip, Link,
-    Chip,
+    Chip, Link,
 } from '@mui/material';
 import './styles/App.css';
 import { getMeteocon } from './utils/weatherIcons'; // Adjusted path
@@ -13,137 +12,26 @@ import CookieConsent from './components/CookieConsent';
 import Navbar from './components/navbar'; // Make sure the path matches your file structure
 import AdPlaceholder from './components/AdPlaceholer';
 import constants from './contexts/constants'; // Adjusted path
+import { WeatherProvider, useWeather } from './context/WeatherContext';
 
-function App() {
-    // Weather data API key from environment variables
-    const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
-
-    // State variables for app data
-    const [weatherData, setWeatherData] = useState(null);
-    const [forecast, setForecast] = useState([]);
-    const [hourlyForecast, setHourlyForecast] = useState([]);
-    const [city, setCity] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const [unitSystem, setUnitSystem] = useState('metric');
-    const [useCurrentLocation, setUseCurrentLocation] = useState(true);
-    const [firstLoad, setFirstLoad] = useState(true);
-
-    // Check if we're in development mode
-    const isDevelopment = import.meta.env.MODE === 'development';
-
-    // Basic fetch function with error handling
-    const fetchWeatherData = async (url) => {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('Data unavailable');
-        return await response.json();
-    };
-
-    // Fetch weather data based on coordinates
-    const fetchWeatherByCoords = useCallback(async (lat, lon) => {
-        try {
-            setLoading(true);
-            setError(null);
-
-            // Build API URLs for current weather and forecast
-            const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=${unitSystem}`;
-            const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=${unitSystem}`;
-
-            // Fetch both in parallel for performance
-            const [weatherData, forecastData] = await Promise.all([
-                fetchWeatherData(weatherUrl),
-                fetchWeatherData(forecastUrl)
-            ]);
-
-            // Update state with results
-            setWeatherData(weatherData);
-            setCity(weatherData.name);
-            // Get one forecast per day (every 8th item = 24 hours)
-            setForecast(forecastData.list.filter((_, index) => index % 8 === 0).slice(0, 5));
-            // Get hourly forecast for the next 24 hours
-            setHourlyForecast(forecastData.list.slice(0, 8));
-        } catch (error) {
-            console.error('Fetch error:', error);
-            setError(error.message);
-            setUseCurrentLocation(false);
-        } finally {
-            setLoading(false);
-            setFirstLoad(false);
-        }
-    }, [API_KEY, unitSystem]);
-
-    const fetchWeatherByCity = useCallback(async (cityName) => {
-        try {
-            setLoading(true);
-            setError(null);
-
-            const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${API_KEY}&units=${unitSystem}`;
-            const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${cityName}&appid=${API_KEY}&units=${unitSystem}`;
-
-            const [weatherData, forecastData] = await Promise.all([
-                fetchWeatherData(weatherUrl),
-                fetchWeatherData(forecastUrl)
-            ]);
-
-            setWeatherData(weatherData);
-            setCity(cityName);
-            setForecast(forecastData.list.filter((_, index) => index % 8 === 0).slice(0, 5));
-            setHourlyForecast(forecastData.list.slice(0, 8));
-        } catch (error) {
-            console.error('Fetch error:', error);
-            setError(error.message);
-        } finally {
-            setLoading(false);
-            setFirstLoad(false);
-        }
-    }, [API_KEY, unitSystem]);
-
-    const fetchWeather = useCallback(() => {
-        if (useCurrentLocation) {
-            if (isDevelopment) {
-                fetchWeatherByCoords(60.192059, 24.945831);
-            } else if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => fetchWeatherByCoords(position.coords.latitude, position.coords.longitude),
-                    () => {
-                        setError("Location access denied. Please search for a city.");
-                        setUseCurrentLocation(false);
-                    }
-                );
-            } else {
-                setUseCurrentLocation(false);
-            }
-        } else if (city) {
-            fetchWeatherByCity(city);
-        }
-    }, [useCurrentLocation, city, isDevelopment, fetchWeatherByCoords, fetchWeatherByCity]);
-
-    // This handler will be triggered when search is submitted from Navbar
-    const handleCitySearch = useCallback((cityName) => {
-        if (cityName) {
-            setUseCurrentLocation(false); // Disable location when searching
-            fetchWeatherByCity(cityName);
-        }
-    }, [fetchWeatherByCity]);
-
-    useEffect(() => {
-        if (firstLoad) {
-            fetchWeather();
-        }
-    }, [firstLoad, fetchWeather]);
-
-    useEffect(() => {
-        if (!firstLoad) {
-            fetchWeather();
-        }
-    }, [firstLoad, useCurrentLocation, unitSystem, fetchWeather]);
+// Main content component that uses the weather context
+function WeatherApp() {
+    const {
+        weatherData,
+        forecast,
+        hourlyForecast,
+        loading,
+        error,
+        unitSystem,
+        firstLoad
+    } = useWeather();
 
     // Get unit values from constants
     const { tempUnit, speedUnit } = constants.getUnits(unitSystem);
     const { tempValue, convertWindSpeed } = constants;
 
     // Show loading screen on first load
-    if (loading && firstLoad) {
+    if (loading && !weatherData) {
         return (
             <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
                 <CircularProgress />
@@ -152,22 +40,11 @@ function App() {
         );
     }
 
-    // Main component render
     return (
-        <>
-        <Navbar 
-            unitSystem={unitSystem} 
-            setUnitSystem={setUnitSystem} 
-            city={city}
-            setCity={setCity}
-            useCurrentLocation={useCurrentLocation}
-            setUseCurrentLocation={setUseCurrentLocation}
-            onSearch={handleCitySearch}
-        />
         <ThemeProvider theme={constants.theme}>
             <Container maxWidth="xl" sx={{
                 py: 1,
-                px: { xs: 2, sm: 3, md: 4 }, // Progressive padding based on screen size
+                px: { xs: 2, sm: 3, md: 4 },
                 display: 'flex',
                 flexDirection: 'column',
                 minHeight: '100vh',
@@ -198,11 +75,11 @@ function App() {
                         <Grid container spacing={2} sx={{
                         width: '100%',
                         mb: 4,
-                        justifyContent: 'center', // Changed from 'flex-start' to 'center'
+                        justifyContent: 'center',
                     }}>
                             {/* Current weather in weather card */}
                             <Grid sx={{ 
-                                width: { xs: '100%', md: '100%', lg: '25%' }, // Add horizontal padding for gap
+                                width: { xs: '100%', md: '100%', lg: '25%' },
                                 mb: 2,
                             }}>
                                 <Card className="weather-card main-weather-card" sx={{
@@ -246,7 +123,7 @@ function App() {
 
                                         {/* Temperature */}
                                         <Typography variant="h2" component="div" sx={{ fontWeight: 700 }}>
-                                            {tempValue(weatherData.main.temp)}{tempUnit}
+                                            {tempValue(weatherData.main.temp, unitSystem)}{tempUnit}
                                         </Typography>
 
                                         {/* Weather Description */}
@@ -265,11 +142,11 @@ function App() {
                                                 label={`Humidity: ${weatherData.main.humidity}%`}
                                                 sx={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white', }} />
                                             <Chip 
-                                                label={`Feels Like: ${tempValue(weatherData.main.feels_like)}${tempUnit}`}
+                                                label={`Feels Like: ${tempValue(weatherData.main.feels_like, unitSystem)}${tempUnit}`}
                                                 sx={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white' }} 
                                             />
                                             <Chip 
-                                                label={`Wind: ${convertWindSpeed(weatherData.wind?.speed)} ${speedUnit}`}
+                                                label={`Wind: ${convertWindSpeed(weatherData.wind?.speed, unitSystem)} ${speedUnit}`}
                                                 sx={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white' }} 
                                             />
                                         </Box>
@@ -304,8 +181,8 @@ function App() {
                                         }} className="equal-height-container">
                                             {[
                                                 ['Pressure', `${weatherData.main.pressure} hPa`],
-                                                ['Min Temp', `${tempValue(weatherData.main.temp_min)}${tempUnit}`],
-                                                ['Max Temp', `${tempValue(weatherData.main.temp_max)}${tempUnit}`]
+                                                ['Min Temp', `${tempValue(weatherData.main.temp_min, unitSystem)}${tempUnit}`],
+                                                ['Max Temp', `${tempValue(weatherData.main.temp_max, unitSystem)}${tempUnit}`]
                                             ].map(([label, value]) => (
                                                 <Card key={label} className="weather-details-card" sx={{
                                                     backgroundColor: '#FFF',
@@ -361,7 +238,7 @@ function App() {
                                                             />
                                                         </Box>
                                                         <Typography variant="body1" fontWeight="medium">
-                                                            {tempValue(hour.main.temp)}{tempUnit}
+                                                            {tempValue(hour.main.temp, unitSystem)}{tempUnit}
                                                         </Typography>
                                                     </CardContent>
                                                 </Card>
@@ -429,7 +306,7 @@ function App() {
                                             />
                                         </Box>
                                         <Typography variant="h6">
-                                            {tempValue(day.main.temp)}{tempUnit}
+                                            {tempValue(day.main.temp, unitSystem)}{tempUnit}
                                         </Typography>
                                         <Typography variant="caption">
                                             {day.weather[0].main}
@@ -445,7 +322,7 @@ function App() {
 
   
                 {/* Show error or prompt if no weather data */}
-                {!weatherData && !firstLoad && !loading && (
+                {!weatherData && !loading && (
                     <Typography textAlign="center" color="text.secondary">
                         {error || "Search for a city to see weather information"}
                     </Typography>
@@ -494,6 +371,43 @@ function App() {
                 </Box>
             </Container>
         </ThemeProvider>
+    );
+}
+
+// Wrapper component that provides the context
+function App() {
+    return (
+        <WeatherProvider>
+            <AppContent />
+        </WeatherProvider>
+    );
+}
+
+// Component that holds the navbar and weather app content
+function AppContent() {
+    const { 
+        unitSystem, 
+        setUnitSystem, 
+        city, 
+        setCity, 
+        useCurrentLocation, 
+        setUseCurrentLocation, 
+        fetchWeatherByCity, 
+        loading 
+    } = useWeather();
+
+    return (
+        <>
+            <Navbar 
+                unitSystem={unitSystem} 
+                setUnitSystem={setUnitSystem} 
+                setCity={setCity}
+                useCurrentLocation={useCurrentLocation}
+                setUseCurrentLocation={setUseCurrentLocation}
+                onSearch={fetchWeatherByCity}
+                loading={loading}
+            />
+            <WeatherApp />
         </>
     );
 }

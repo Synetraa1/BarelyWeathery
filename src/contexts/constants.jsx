@@ -20,7 +20,14 @@ const constants = {
     },
     
     // Format temperature value
-    tempValue: (temp) => Math.round(temp),
+    tempValue: (temp, unitSystem) => {
+        if (unitSystem === 'imperial') {
+          // Convert Celsius to Fahrenheit if the data is in metric
+          return Math.round((temp * 9/5) + 32);
+        }
+        // For metric, just round the value (assuming API returns Celsius)
+        return Math.round(temp);
+      },
     
     // Convert wind speed based on unit system selected
     convertWindSpeed: (speed, unitSystem) => {
