@@ -11,7 +11,7 @@ const PrivacyPolicy = () => {
                 <Box sx={{ mt: 4 }}>
                     <Typography variant="h5" gutterBottom>1. Introduction</Typography>
                     <Typography paragraph>
-                        Welcome to Weather or Not. We respect your privacy and are committed to protecting your personal data.
+                        Welcome to BarelyWeathery. We respect your privacy and are committed to protecting your personal data.
                         This Privacy Policy explains how we collect, use, and safeguard your information when you use our website and services.
                     </Typography>
                 </Box>
@@ -67,7 +67,6 @@ const PrivacyPolicy = () => {
                     <Typography component="ul" sx={{ pl: 4 }}>
                         <li>OpenWeather API for weather data</li>
                         <li>Google Analytics for website analytics</li>
-                        <li>Google AdSense for displaying advertisements</li>
                         <li>Mapbox for location services</li>
                     </Typography>
                     <Typography paragraph>
