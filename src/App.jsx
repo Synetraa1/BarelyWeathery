@@ -329,7 +329,6 @@ function WeatherApp() {
                 )}
 
                 <CookieConsent /> {/* Cookie consent dialog */}
-                <Analytics/>
 
                 {/* Site footer */}
                 <Box component="footer" sx={{
