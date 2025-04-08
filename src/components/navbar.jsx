@@ -113,7 +113,7 @@ const Navbar = ({
     setAnchorEl(searchRef.current);
     
     // Only fetch suggestions if there's enough text
-    if (value.length >= 2) {
+    if (value.length >= 3) {
       fetchCitySuggestions(value);
     } else {
       setOptions([]);
@@ -423,24 +423,22 @@ const Navbar = ({
                     borderRadius: '20px',
                     width: '100%',
                     height: '40px',
-                    backgroundColor: useCurrentLocation ? 'rgba(76, 175, 80, 0.2)' : 'rgba(255, 255, 255, 0.9)',
-                    border: useCurrentLocation ? '1px solid #4caf50' : 'none'
+                    backgroundColor: useCurrentLocation ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.9)',
                   }}
                 >
                   <InputBase
                     sx={{ 
                       ml: 1, 
                       flex: 1,
-                      color: useCurrentLocation ? '#4caf50' : 'inherit',
+                      color: useCurrentLocation ? '#000' : 'inherit',
                       '&.Mui-disabled': {
-                        color: useCurrentLocation ? '#4caf50' : 'rgba(0, 0, 0, 0.38)'
+                        color: useCurrentLocation ? '#000' : 'rgba(0, 0, 0, 0.38)'
                       }
                     }}
                     placeholder={useCurrentLocation ? "Using your location..." : "Search city..."}
                     inputProps={{ 'aria-label': 'search city' }}
                     value={searchValue}
                     onChange={handleSearchChange}
-                    disabled={useCurrentLocation}
                   />
                   <IconButton 
                     type="submit" 
@@ -504,7 +502,7 @@ const Navbar = ({
             </ClickAwayListener>
 
             {/* Location button - always visible */}
-            <Tooltip title={useCurrentLocation ? "Currently using your location, click to enable search" : "Use your location"}>
+            <Tooltip title={useCurrentLocation ? "Currently using your location" : "Use your location"}>
                 <IconButton
                     onClick={handleLocationToggle}
                     sx={{

@@ -343,12 +343,6 @@ function WeatherApp() {
                     <Typography variant="body2" color="#FFF" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                         &copy; {new Date().getFullYear()} BarelyWeathery
                         <span style={{ margin: '0 4px' }}>|</span>
-                        <Typography variant="body2" color="#FFF" component="span">
-                            <Link href="https://www.github.com/Synetraa1" target="_blank" rel="noopener noreferrer" style={{ color: '#fff', textDecoration: 'none' }}>
-                                My GitHub
-                            </Link>
-                        </Typography>
-                        <span style={{ margin: '0 4px' }}>|</span>
                         <Link href="/privacy-policy" target="_blank" style={{ color: '#3f95ea', textDecoration: 'none' }}>
                             Privacy Policy
                         </Link>
@@ -361,10 +355,6 @@ function WeatherApp() {
                             Powered by <Link href="https://openweathermap.org/" target="_blank" rel="noopener noreferrer" style={{ color: '#3f95ea', textDecoration: 'none' }}>
                                 OpenWeatherMap
                             </Link>
-                        </Typography>
-                        <span style={{ margin: '0 4px' }}>|</span>
-                        <Typography variant="body2" color="#FFF" component="span">
-                            Logo created with AI assistance
                         </Typography>
                     </Typography>
                 </Box>
