@@ -22,7 +22,6 @@ const constants = {
     // Format temperature value
     tempValue: (temp, unitSystem) => {
         if (unitSystem === 'imperial') {
-          // Convert Celsius to Fahrenheit if the data is in metric
           return Math.round((temp * 9/5) + 32);
         }
         // For metric, just round the value (assuming API returns Celsius)
@@ -32,7 +31,6 @@ const constants = {
     // Convert wind speed based on unit system selected
     convertWindSpeed: (speed, unitSystem) => {
         if (unitSystem === 'metric') {
-            // API gives m/s for metric, but we want km/h for display
             return Math.round(speed * 3.6);
         }
         // Already in mph for imperial

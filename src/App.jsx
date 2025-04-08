@@ -10,7 +10,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import CookieConsent from './components/CookieConsent';
 import Navbar from './components/navbar';
 import AdPlaceholder from './components/AdPlaceholer';
-import constants from './contexts/constants';
+import constants from './context/constants';
 import { WeatherProvider, useWeather } from './context/WeatherContext';
 import WeatherSummary from './components/weathersummary';
 

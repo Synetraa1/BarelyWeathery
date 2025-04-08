@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, Typography, Box, CircularProgress } from '@mui/material';
 import { useWeather } from '../context/WeatherContext';
-import constants from '../contexts/constants';
+import constants from '../context/constants';
 
 const WeatherSummary = () => {
   const { weatherData, unitSystem } = useWeather();
@@ -10,84 +10,136 @@ const WeatherSummary = () => {
   const [error, setError] = useState(null);
 
   const { tempUnit, speedUnit } = constants.getUnits(unitSystem);
+  const { tempValue, convertWindSpeed } = constants;
 
-  const getWeatherContext = (weatherId) => {
-    if (!weatherId) return '';
+  // Custom weather insight generator
+  const generateInsight = (data, unit) => {
+    if (!data) return "";
     
-    if (weatherId >= 200 && weatherId < 300) return 'thunderstorm';
-    if (weatherId >= 300 && weatherId < 400) return 'drizzle';
-    if (weatherId >= 500 && weatherId < 600) return 'rain';
-    if (weatherId >= 600 && weatherId < 700) return 'snow';
-    if (weatherId >= 700 && weatherId < 800) return 'atmospheric condition';
-    if (weatherId === 800) return 'clear sky';
-    if (weatherId > 800) return 'cloudy';
+    const temp = data.main?.temp;
+    const feelsLike = data.main?.feels_like;
+    const description = data.weather?.[0]?.description || 'clear';
+    const humidity = data.main?.humidity;
+    const windSpeed = data.wind?.speed;
+    const cityName = data.name;
+    const isDay = data.weather?.[0]?.icon?.includes('d');
     
-    return '';
-  };
-
-  useEffect(() => {
-    const generateSummary = async () => {
-      if (!weatherData) return;
-      
-      setIsLoading(true);
-      setError(null);
-      
-      const weatherDescription = weatherData.weather?.[0]?.description || 'Unknown';
-      const formattedDescription = weatherDescription.charAt(0).toUpperCase() + weatherDescription.slice(1);
-      
-      const temperature = weatherData.main?.temp;
-      const formattedTemp = temperature ? Math.round(temperature) : 'N/A';
-      
-      const feelsLike = weatherData.main?.feels_like;
-      const formattedFeelsLike = feelsLike ? Math.round(feelsLike) : 'N/A';
-      
-      const iconCode = weatherData.weather?.[0]?.icon || '';
-      const isDaytime = iconCode.endsWith('d') ? 'during the day' : iconCode.endsWith('n') ? 'at night' : '';
-      
-      try {
-        const response = await fetch("https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2", {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${import.meta.env.VITE_HUGGINGFACE_API_KEY}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            inputs: `Generate a friendly, conversational 2-3 sentence weather summary based on these conditions:
-              Location: ${weatherData.name}, ${weatherData.sys?.country || ''}
-              Temperature: ${formattedTemp}°C (feels like ${formattedFeelsLike}°C)
-              Conditions: ${formattedDescription} ${isDaytime}
-              Wind: ${weatherData.wind?.speed || 'N/A'} ${speedUnit}
-              Humidity: ${weatherData.main?.humidity || 'N/A'}%
-              Weather ID: ${weatherData.weather?.[0]?.id || 'Unknown'}
-              Main Weather Type: ${weatherData.weather?.[0]?.main || 'Unknown'}
-              
-              The summary should be natural-sounding, personalized, and highlight the most important aspects of the weather. Don't just list the data - create a helpful summary that emphasizes what the weather actually feels like and any notable conditions. Include practical advice if relevant.`
-          })
-        });
-        
-        if (!response.ok) {
-          throw new Error('Failed to generate weather summary');
-        }
-        
-        const data = await response.json();
-        
-        const generatedText = data[0]?.generated_text || '';
-        const summaryText = generatedText.split('The summary should be')[1]?.split('\n\n')[1] || generatedText;
-        
-        setSummary(summaryText);
-      } catch (err) {
-        console.error('Error generating summary:', err);
-        setError('Could not generate weather summary at this time');
-        setSummary(null);
-      } finally {
-        setIsLoading(false);
+    const formattedTemp = tempValue(temp, unit);
+    const formattedFeelsLike = tempValue(feelsLike, unit);
+    const formattedWindSpeed = windSpeed !== undefined ? 
+      convertWindSpeed(windSpeed, unit) : 'N/A';
+    
+    // Temperature categorization
+    const categorizeTemp = (temp) => {
+      if (unit === 'imperial') {
+        if (temp > 85) return 'hot';
+        if (temp > 70) return 'warm';
+        if (temp > 55) return 'mild';
+        if (temp > 40) return 'cool';
+        if (temp > 32) return 'cold';
+        return 'freezing';
+      } else {
+        if (temp > 29) return 'hot';
+        if (temp > 21) return 'warm';
+        if (temp > 12) return 'mild';
+        if (temp > 4) return 'cool';
+        if (temp > 0) return 'cold';
+        return 'freezing';
       }
     };
 
+    const tempCategory = categorizeTemp(formattedTemp);
+    
+    // Clothing suggestions based on temperature
+    const clothingSuggestions = {
+      hot: 'Wear light, breathable clothing and don\'t forget sunscreen.',
+      warm: 'A light jacket might be handy, especially if you\'re out late.',
+      mild: 'A medium-weight jacket should keep you comfortable throughout the day.',
+      cool: 'You\'ll want a warm jacket when heading outside.',
+      cold: 'Bundle up with a warm coat, hat, and gloves before venturing outdoors.',
+      freezing: 'Dress in multiple layers with a heavy coat, hat, gloves, and scarf for these freezing temperatures.'
+    };
+
+    // Weather condition descriptions
+    const getWeatherDescription = () => {
+      const timePhrase = isDay ? "today" : "tonight";
+      
+      const weatherDescriptions = {
+        'clear': isDay 
+          ? `The sky is beautifully clear in ${cityName} ${timePhrase}` 
+          : `The night sky is clear in ${cityName} ${timePhrase}`,
+        'cloud': `${cityName} is experiencing cloudy skies ${timePhrase}`,
+        'rain': `It's rainy in ${cityName} ${timePhrase}, so have an umbrella handy`,
+        'snow': `${cityName} is seeing snowfall ${timePhrase}, making for a winter wonderland`,
+        'fog': `There's fog in ${cityName} ${timePhrase}, reducing visibility`,
+        'storm': `${cityName} is experiencing stormy conditions ${timePhrase}, so stay safe indoors if possible`
+      };
+
+      // Find the first matching description
+      for (let key in weatherDescriptions) {
+        if (description.includes(key)) {
+          return weatherDescriptions[key];
+        }
+      }
+
+      // Fallback
+      return `${cityName} is experiencing ${description} ${timePhrase}`;
+    };
+
+    // Generate feels-like comparison
+    const getFeelsLikePhrase = () => {
+      const tempDiff = Math.abs(formattedTemp - formattedFeelsLike);
+      const isWindy = formattedWindSpeed > (unit === 'imperial' ? 10 : 15);
+      
+      if (tempDiff > 3) {
+        return formattedFeelsLike < formattedTemp
+          ? `though it feels colder at ${formattedFeelsLike}${tempUnit} due to the ${isWindy ? 'wind' : 'conditions'}`
+          : `though it feels warmer at ${formattedFeelsLike}${tempUnit} due to the ${humidity > 70 ? 'humidity' : 'conditions'}`;
+      }
+      
+      return `with a feels-like temperature of ${formattedFeelsLike}${tempUnit}`;
+    };
+
+    // Wind description
+    const getWindPhrase = () => {
+      const isWindy = formattedWindSpeed > (unit === 'imperial' ? 10 : 15);
+      const isVeryWindy = formattedWindSpeed > (unit === 'imperial' ? 20 : 30);
+      
+      if (isVeryWindy) {
+        return `Strong winds at ${formattedWindSpeed} ${speedUnit} are making conditions more challenging`;
+      }
+      
+      if (isWindy) {
+        return `The ${formattedWindSpeed} ${speedUnit} breeze adds a bit of a chill`;
+      }
+      
+      return `With light winds of ${formattedWindSpeed} ${speedUnit}`;
+    };
+
+    // Combine everything into a natural-sounding insight
+    return `${getWeatherDescription()} with a temperature of ${formattedTemp}${tempUnit}, ${getFeelsLikePhrase()}. ${getWindPhrase()}, and humidity at ${humidity}%. ${clothingSuggestions[tempCategory]}`;
+  };
+
+  useEffect(() => {
     if (weatherData) {
-      generateSummary();
+      setIsLoading(true);
+      
+      try {
+        const generatedInsight = generateInsight(weatherData, unitSystem);
+        setSummary(generatedInsight);
+        setError(null);
+      } catch (err) {
+        console.error('Error generating weather insight:', err);
+        setError('Could not generate weather summary at this time');
+        
+        // Create basic fallback
+        const fallback = `It's currently ${tempValue(weatherData.main?.temp, unitSystem)}${tempUnit} in ${weatherData.name} with ${weatherData.weather?.[0]?.description || 'current conditions'}. Feels like ${tempValue(weatherData.main?.feels_like, unitSystem)}${tempUnit} with wind at ${convertWindSpeed(weatherData.wind?.speed, unitSystem)} ${speedUnit} and humidity at ${weatherData.main?.humidity || 'N/A'}%.`;
+        setSummary(fallback);
+      } finally {
+        setIsLoading(false);
+      }
     }
-  }, [weatherData, speedUnit, unitSystem]);
+  }, [weatherData, unitSystem]);
 
   if (!weatherData) return null;
 
@@ -100,7 +152,7 @@ const WeatherSummary = () => {
       width: '100%',
       mx: 'auto',
       maxWidth: '1300px',
-      mb:5,
+      mb: 5,
     }}>
       <CardContent>
         <Typography variant="h6" gutterBottom sx={{fontWeight:'500'}}>
@@ -115,16 +167,21 @@ const WeatherSummary = () => {
             </Typography>
           </Box>
         ) : error ? (
-          <Typography variant="body1" color="error.light" sx={{ py: 2 }}>
-            {error}
-          </Typography>
+          <Box>
+            <Typography variant="body1" sx={{ py: 2, lineHeight: 1.6 }}>
+              {summary}
+            </Typography>
+            <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'rgba(255,255,255,0.7)', fontStyle: 'italic' }}>
+              Basic weather information
+            </Typography>
+          </Box>
         ) : (
           <Box>
             <Typography variant="body1" sx={{ py: 2, lineHeight: 1.6 }}>
               {summary}
             </Typography>
             <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'rgba(255,255,255,0.7)', fontStyle: 'italic' }}>
-              AI-generated summary based on current conditions
+              Weather insight based on current conditions
             </Typography>
           </Box>
         )}
