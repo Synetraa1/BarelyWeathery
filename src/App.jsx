@@ -206,7 +206,7 @@ function WeatherApp() {
                                         <Box sx={{ width: '100%' }}>
                                         <Typography variant="h6" gutterBottom sx={{pt:1}}>Next 24 Hours</Typography>
                                         <Typography variant="body2" sx={{ fontStyle: 'italic', color: '#808080' }} gutterBottom>
-                                            Updated in 3 hour intervals
+                                            In 3 hour intervals
                                         </Typography>
                                         <Box className="scrollable-container forecast-scroll-container" sx={{ 
                                             width: '100%',
