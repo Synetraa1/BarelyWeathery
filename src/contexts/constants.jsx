@@ -14,7 +14,7 @@ const constants = {
     // Temperature unit helper functions
     getUnits: (unitSystem) => {
         const tempUnit = unitSystem === 'metric' ? String.fromCharCode(176) + 'C' : String.fromCharCode(176) + 'F';
-        const speedUnit = unitSystem === 'metric' ? 'kph' : 'mph';
+        const speedUnit = unitSystem === 'metric' ? 'km/h' : 'mph';
         
         return { tempUnit, speedUnit };
     },

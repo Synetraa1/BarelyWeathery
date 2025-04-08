@@ -130,7 +130,7 @@ const Navbar = ({
       
       setCity(searchValue.trim());
       if (onSearch) onSearch(searchValue.trim());
-      setUseCurrentLocation(false); // Explicitly set to false
+      setUseCurrentLocation(false);
       setSearchValue('');
       setOptions([]);
     }
@@ -164,8 +164,6 @@ const Navbar = ({
         navigator.geolocation.getCurrentPosition(
           (position) => {
             const { latitude, longitude } = position.coords;
-            // You might want to reverse geocode here to get the city name
-            // For example:
             fetchCityFromCoords(latitude, longitude);
           },
           (error) => {

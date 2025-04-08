@@ -16,9 +16,9 @@ body {
     margin: 0;
     display: flex;
     place-items: center;
-    font-family: inherit; /* Ensures inheritance */
+    font-family: inherit;
 }
 
 * {
-    font-family: inherit; /* Force inheritance on all elements */
+    font-family: inherit;
 }

@@ -5,14 +5,15 @@ import {
     Chip, Link,
 } from '@mui/material';
 import './styles/App.css';
-import { getMeteocon } from './utils/weatherIcons'; // Adjusted path
+import { getMeteocon } from './utils/weatherIcons'; 
 import { ThemeProvider } from '@mui/material/styles';
-import { Analytics } from "@vercel/analytics/react";
 import CookieConsent from './components/CookieConsent';
-import Navbar from './components/navbar'; // Make sure the path matches your file structure
+import Navbar from './components/navbar';
 import AdPlaceholder from './components/AdPlaceholer';
-import constants from './contexts/constants'; // Adjusted path
+import constants from './contexts/constants';
 import { WeatherProvider, useWeather } from './context/WeatherContext';
+import WeatherSummary from './components/weathersummary';
+
 
 // Main content component that uses the weather context
 function WeatherApp() {
@@ -48,23 +49,22 @@ function WeatherApp() {
                 display: 'flex',
                 flexDirection: 'column',
                 minHeight: '100vh',
-                mt: '60px', // Add margin-top to account for fixed navbar
-                mx: 'auto', // Center container
-                width: '100%', // Full width
-                maxWidth: '100%', // Prevent overflow
-                overflow: 'hidden', // Hide overflow at container level
-                boxSizing: 'border-box', // Include padding in width calculation
+                mt: '60px',
+                mx: 'auto',
+                width: '100%',
+                maxWidth: '100%',
+                overflow: 'hidden',
+                boxSizing: 'border-box',
             }}>
-                <Analytics />
 
                 {/* Main content container */}
                 <Paper elevation={3} sx={{
-                    p: { xs: 1, sm: 2, md: 3, lg: 4 }, // Progressive padding
+                    p: { xs: 1, sm: 2, md: 3, lg: 4 },
                     mb: 4,
                     backgroundColor: { xs: 'transparent', md: 'transparent', lg: '#636363' },
                     mx: 'auto',
                     maxWidth: '1300px',
-                    width: '100%', // Full width
+                    width: '100%',
                     borderRadius: '16px',
                     overflow: 'hidden',
                     boxSizing: 'border-box',
@@ -72,6 +72,7 @@ function WeatherApp() {
 
                     {/* Weather display grid - only shows when data is loaded */}
                     {weatherData && (
+                           <>
                         <Grid container spacing={2} sx={{
                         width: '100%',
                         mb: 4,
@@ -88,8 +89,8 @@ function WeatherApp() {
                                     borderRadius: '16px',
                                     position: 'relative',
                                     overflow: 'hidden',
-                                    margin: { xs: '0 auto', md: 0 }, // Center on mobile
-                                    width: '100%', // Full width of grid item
+                                    margin: { xs: '0 auto', md: 0 },
+                                    width: '100%',
                                     boxSizing: 'border-box',
                                 }}>
                                     <CardContent sx={{ 
@@ -101,7 +102,7 @@ function WeatherApp() {
                                         justifyContent: 'center',
                                         position: 'relative',
                                         zIndex: 1,
-                                        p: { xs: 2, md: 3 }, // Better padding
+                                        p: { xs: 2, md: 3 },
                                     }}>
                                         {/* Location */}
                                         <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
@@ -137,22 +138,23 @@ function WeatherApp() {
                                         </Typography>
 
                                         {/* Weather Details */}
-                                        <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', mt: 2, gap: 1 }}>
+                                        <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', mt: 2, gap: 1}}>
                                             <Chip 
                                                 label={`Humidity: ${weatherData.main.humidity}%`}
-                                                sx={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white', }} />
+                                                sx={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white', fontSize:{xs:'14px', md:'26px', lg:'16px'}  }} />
                                             <Chip 
                                                 label={`Feels Like: ${tempValue(weatherData.main.feels_like, unitSystem)}${tempUnit}`}
-                                                sx={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white' }} 
+                                                sx={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white',  fontSize:{xs:'14px', md:'26px', lg:'16px'}  }} 
                                             />
                                             <Chip 
                                                 label={`Wind: ${convertWindSpeed(weatherData.wind?.speed, unitSystem)} ${speedUnit}`}
-                                                sx={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white' }} 
+                                                sx={{ backgroundColor: 'rgba(255,255,255,0.2)', color: 'white',  fontSize:{xs:'14px', md:'26px', lg:'16px'}  }} 
                                             />
                                         </Box>
                                     </CardContent>
                                 </Card>
                             </Grid>
+                            
 
                             {/* Weather details panel */}
                             <Grid sx={{
@@ -163,14 +165,14 @@ function WeatherApp() {
                                     height: '97%', 
                                     backgroundColor: '#002471', 
                                     borderRadius: '16px',
-                                    margin: { xs: '0 auto', md: 0 }, // Center on mobile
-                                    width: '100%', // Full width of grid item
+                                    margin: { xs: '0 auto', md: 0 },
+                                    width: '100%',
                                     boxSizing: 'border-box',
                                 }}>
                                     <CardContent sx={{ 
                                         height: '100%', 
                                         color: '#FFF',
-                                        p: { xs: 2, md: 3 }, // Better padding
+                                        p: { xs: 2, md: 3 },
                                     }}>
                                         <Typography variant="h6" gutterBottom>Weather Details</Typography>
                                         <Box sx={{ 
@@ -211,6 +213,7 @@ function WeatherApp() {
                                             WebkitOverflowScrolling: 'touch',
                                         }}>
                                             {hourlyForecast.map((hour, index) => (
+                                                
                                                 <Card key={index} className="hourly-forecast-card" sx={{
                                                     borderRadius: '16px',
                                                     backgroundColor: 'white'
@@ -245,11 +248,12 @@ function WeatherApp() {
                                             ))}
                                         </Box>
                                     </Box>
-
                                     </CardContent>
                                 </Card>
                             </Grid>
                         </Grid>
+                        <WeatherSummary />
+                        </>
                     )}
 
                 {forecast.length > 0 && (
@@ -271,7 +275,7 @@ function WeatherApp() {
                         justifyContent: { xs: 'flex-start', md: 'space-between' },
                         overflowX: { xs: 'auto', md: 'visible' },
                         width: '100%',
-                        pb: 2 // Added padding to the bottom
+                        pb: 2
                     }}>
                             {forecast.map((day, index) => (
                                 <Card key={index} className="forecast-day-card" sx={{
