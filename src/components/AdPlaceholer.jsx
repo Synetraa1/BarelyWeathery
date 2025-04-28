@@ -78,8 +78,8 @@ const AdPlaceholder = ({ width, height, adSlot }) => {
             }}
             data-ad-client="ca-pub-4039094909147349"
             data-ad-slot={adSlot}
-            data-ad-format="auto"
-            data-full-width-responsive="true"
+              data-ad-format="horizontal"
+              data-full-width-responsive="true"
           />
         </Box>
       )}
