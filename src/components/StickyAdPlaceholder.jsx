@@ -88,14 +88,14 @@ const StickyAdPlaceholder = ({
 
         {/* Display AdSense ad if adSlot is provided */}
         {adSlot ? (
-          <Box sx={{ width: width || '100%', height: height || '90px' }}>
+          <Box sx={{ width: width || '100%', height: height || '100px' }}>
             <ins
               ref={adRef}
               className="adsbygoogle"
               style={{
                 display: 'block',
                 width: width || '728px',
-                height: height || '90px',
+                height: height || '100px',
               }}
               data-ad-client="ca-pub-4039094909147349"
               data-ad-slot={adSlot}
@@ -108,7 +108,7 @@ const StickyAdPlaceholder = ({
           <Box
             sx={{
               width: width || '100%',
-              height: height || '90px',
+              height: height || '100px',
               backgroundColor: 'rgba(200, 200, 200, 0.1)',
               display: 'flex',
               justifyContent: 'center',

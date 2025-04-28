@@ -38,7 +38,7 @@ const AdPlaceholder = ({ width, height, adSlot }) => {
         <Box
           sx={{
             width: width || '100%',
-            height: height || '90px',
+            height: height || '100px',
             backgroundColor: 'rgba(200, 200, 200, 0.1)',
             display: 'flex',
             justifyContent: 'center',
@@ -61,7 +61,7 @@ const AdPlaceholder = ({ width, height, adSlot }) => {
         <Box
           sx={{
             width: width || '100%',
-            height: height || '90px',
+            height: height || '100px',
             my: 2,
             display: 'flex',
             justifyContent: 'center',
@@ -74,7 +74,7 @@ const AdPlaceholder = ({ width, height, adSlot }) => {
             style={{
               display: 'block',
               width: width || '100%',
-              height: height || '90px',
+              height: height || '100px',
             }}
             data-ad-client="ca-pub-4039094909147349"
             data-ad-slot={adSlot}
