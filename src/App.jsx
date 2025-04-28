@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect  } from 'react';
 import {
     Box, Container, Typography, Paper,
     CircularProgress, Grid, Card, CardContent, Avatar,
@@ -10,6 +10,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import CookieConsent from './components/CookieConsent';
 import Navbar from './components/navbar';
 import AdPlaceholder from './components/AdPlaceholer';
+import StickyAdPlaceholder from './components/StickyAdPlaceholder';
 import constants from './context/constants';
 import { WeatherProvider, useWeather } from './context/WeatherContext';
 import WeatherSummary from './components/weathersummary';
@@ -58,6 +59,7 @@ function WeatherApp() {
             }}>
 
                 {/* Main content container */}
+                <AdPlaceholder/>
                 <Paper elevation={3} sx={{
                     p: { xs: 1, sm: 2, md: 3, lg: 4 },
                     mb: 4,
@@ -255,7 +257,7 @@ function WeatherApp() {
                         <WeatherSummary />
                         </>
                     )}
-
+                    <AdPlaceholder/>
                 {forecast.length > 0 && (
                     <Paper elevation={3} sx={{
                         display: 'flex',
@@ -331,7 +333,7 @@ function WeatherApp() {
                         {error || "Search for a city to see weather information"}
                     </Typography>
                 )}
-
+                <AdPlaceholder/>
 
                 {/* Site footer */}
                 <Box component="footer" sx={{
@@ -361,6 +363,7 @@ function WeatherApp() {
                         </Typography>
                     </Typography>
                 </Box>
+                <AdPlaceholder/>
             </Container>
         </ThemeProvider>
     );
@@ -388,6 +391,23 @@ function AppContent() {
         loading 
     } = useWeather();
 
+    const [showStickyAd, setShowStickyAd] = useState(true);
+
+    // Handler for closing the ad
+    const handleAdClose = () => {
+        setShowStickyAd(false);
+        // Optionally save preference to localStorage
+        localStorage.setItem('hideStickyAd', 'true');
+    };
+
+    // Check localStorage on component mount
+    useEffect(() => {
+        const adHidden = localStorage.getItem('hideStickyAd') === 'true';
+        if (adHidden) {
+            setShowStickyAd(false);
+        }
+    }, []);
+
     return (
         <>
             <Navbar 
@@ -399,7 +419,15 @@ function AppContent() {
                 onSearch={fetchWeatherByCity}
                 loading={loading}
             />
+
+            <StickyAdPlaceholder 
+                show={showStickyAd}
+                onClose={handleAdClose}
+                height="90px"
+            />
+
             <WeatherApp />
+
         </>
     );
 }
