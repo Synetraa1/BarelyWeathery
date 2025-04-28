@@ -59,7 +59,6 @@ function WeatherApp() {
             }}>
 
                 {/* Main content container */}
-                <AdPlaceholder/>
                 <Paper elevation={3} sx={{
                     p: { xs: 1, sm: 2, md: 3, lg: 4 },
                     mb: 4,
@@ -257,7 +256,6 @@ function WeatherApp() {
                         <WeatherSummary />
                         </>
                     )}
-                    <AdPlaceholder/>
                 {forecast.length > 0 && (
                     <Paper elevation={3} sx={{
                         display: 'flex',
@@ -333,7 +331,6 @@ function WeatherApp() {
                         {error || "Search for a city to see weather information"}
                     </Typography>
                 )}
-                <AdPlaceholder/>
 
                 {/* Site footer */}
                 <Box component="footer" sx={{
@@ -363,7 +360,6 @@ function WeatherApp() {
                         </Typography>
                     </Typography>
                 </Box>
-                <AdPlaceholder/>
             </Container>
         </ThemeProvider>
     );
@@ -420,11 +416,6 @@ function AppContent() {
                 loading={loading}
             />
 
-            <StickyAdPlaceholder 
-                show={showStickyAd}
-                onClose={handleAdClose}
-                height="90px"
-            />
 
             <WeatherApp />
 
