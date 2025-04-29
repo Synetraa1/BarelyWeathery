@@ -104,7 +104,7 @@ function WeatherApp() {
 
     // Get unit values from constants
     const { tempUnit, speedUnit } = constants.getUnits(unitSystem);
-    const { tempValue, convertWindSpeed, convertVisibility } = constants;
+    const { tempValue, convertWindSpeed } = constants;
 
 
     // Show loading screen on first load
@@ -289,7 +289,7 @@ function WeatherApp() {
                                             ['Cloud Cover', `${weatherData.clouds.all}%`]
                                         ],
                                         [
-                                            ['Visibility', `${weatherData.visibility} ${unitSystem === 'metric' ? 'km' : 'mi'}`],
+                                            ['Visibility', `${unitSystem === 'metric' ? weatherData.visibility : (weatherData.visibility * 0.621371).toFixed(1)} ${unitSystem === 'metric' ? 'km' : 'mi'}`],
                                             ['Precipitation (Past hour)', `${weatherData.rain && weatherData.rain['1h'] ? weatherData.rain['1h'] + ' mm' : 'None'}`]
                                         ]
                                         ].map((row, rowIndex) => (
