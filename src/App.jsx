@@ -163,7 +163,7 @@ function WeatherApp() {
                                 mx: 'auto',
                             }}>
                                 <Card className="weather-card details-card" sx={{ 
-                                    height: '97%', 
+                                    height: '100%', 
                                     backgroundColor: '#002471', 
                                     borderRadius: '16px',
                                     margin: { xs: '0 auto', md: 0 },
@@ -181,18 +181,20 @@ function WeatherApp() {
                                             flexDirection: {xs:'column', md:'row', lg:'row'},
                                             width: '100%',
                                             gap: 2,
+                                            
                                         }} className="equal-height-container">
                                             {[
+                                                ['Sunrise - Sunset', weatherData ? `${weatherData.formattedSunrise} - ${weatherData.formattedSunset}` : 'N/A'],
                                                 ['Pressure', `${weatherData.main.pressure} hPa`],
                                                 ['Min Temp', `${tempValue(weatherData.main.temp_min, unitSystem)}${tempUnit}`],
-                                                ['Max Temp', `${tempValue(weatherData.main.temp_max, unitSystem)}${tempUnit}`]
+                                                ['Max Temp', `${tempValue(weatherData.main.temp_max, unitSystem)}${tempUnit}`],
                                             ].map(([label, value]) => (
                                                 <Card key={label} className="weather-details-card" sx={{
                                                     backgroundColor: '#FFF',
                                                     color: '#000',
                                                     borderRadius: '16px',
                                                     width: {xs:'100%', md:'100%', lg:'20%'},
-                                                    mb: 1
+                                                    mb: 1,
                                                 }}>
                                                     <CardContent className="card-content-center" sx={{ 
                                                         '&:last-child': { pb: 2 }
@@ -204,7 +206,7 @@ function WeatherApp() {
                                             ))}
                                         </Box>
                                         {/* Hourly Forecast Section */}
-                                        <Box sx={{ width: '100%' }}>
+                                        <Box sx={{ width: '100%', }}>
                                         <Typography variant="h6" gutterBottom sx={{pt:1}}>Next 24 Hours</Typography>
                                         <Typography variant="body2" sx={{ fontStyle: 'italic', color: '#808080' }} gutterBottom>
                                             In 3 hour intervals
@@ -212,6 +214,7 @@ function WeatherApp() {
                                         <Box className="scrollable-container forecast-scroll-container" sx={{ 
                                             width: '100%',
                                             WebkitOverflowScrolling: 'touch',
+                                            
                                         }}>
                                             {hourlyForecast.map((hour, index) => (
                                                 

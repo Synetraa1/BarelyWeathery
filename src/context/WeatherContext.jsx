@@ -18,7 +18,7 @@ export function WeatherProvider({ children }) {
   const [useCurrentLocation, setUseCurrentLocation] = useState(true);
   const toggleInProgress = useRef(false);
   const [lastFetchTime, setLastFetchTime] = useState(null);
-
+  const [firstLoad, setFirstLoad] = useState(true);
 
   // Utility functions for temperature and wind speed conversion
   const convertTemperature = (temp, toUnit) => {
@@ -34,10 +34,10 @@ export function WeatherProvider({ children }) {
   const convertWindSpeed = (speed, toUnit) => {
     if (toUnit === 'imperial') {
       // Convert m/s to mph
-      return speed * 2.237;
+      return Math.round(speed * 2.237 * 10) / 10;
     } else {
       // Convert mph to m/s
-      return speed / 2.237;
+      return Math.round(speed / 2.237 * 10) / 10;
     }
   };
   
@@ -48,21 +48,25 @@ export function WeatherProvider({ children }) {
         (position) => {
           const { latitude, longitude } = position.coords;
           fetchWeatherByCoords(latitude, longitude);
+          setFirstLoad(false);
         },
         (error) => {
           console.error("Error getting location:", error);
           setUseCurrentLocation(false);
           // Fallback to a default city
           fetchWeatherByCity("London");
+          setFirstLoad(false);
         }
       );
     } else if (city) {
       fetchWeatherByCity(city);
+      setFirstLoad(false);
     } else {
       // Default city if no location or city is set
       fetchWeatherByCity("London");
+      setFirstLoad(false);
     }
-  }, []);
+  }, [useCurrentLocation, city]); // Add proper dependencies
 
   // Memoized fetch function
   const fetchWeatherData = useCallback(async (url) => {
@@ -80,8 +84,14 @@ export function WeatherProvider({ children }) {
   // Helper function for weather descriptions
   const getWeatherDescription = (temp, condition, windSpeed, humidity, isDay) => {
     // This is a placeholder - implement your weather description logic here
-    // You can replace this with your actual describeWeather function from utils
     return `Weather condition: ${condition}, Temperature: ${temp}°${unitSystem === 'metric' ? 'C' : 'F'}`;
+  };
+
+  // Format sunrise and sunset times
+  const formatSunTime = (timestamp) => {
+    if (!timestamp) return 'N/A';
+    const date = new Date(timestamp * 1000);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
   // Common data processing function with unit conversion
@@ -115,6 +125,12 @@ export function WeatherProvider({ children }) {
       }));
     }
     
+    // Add formatted sunrise and sunset times
+    if (processedCurrent.sys) {
+      processedCurrent.formattedSunrise = formatSunTime(processedCurrent.sys.sunrise);
+      processedCurrent.formattedSunset = formatSunTime(processedCurrent.sys.sunset);
+    }
+    
     setWeatherData({
       ...processedCurrent,
       description: getWeatherDescription(
@@ -133,7 +149,6 @@ export function WeatherProvider({ children }) {
 
   // Weather fetching functions
   const fetchWeatherByCoords = useCallback(async (lat, lon) => {
-
     if (isCacheValid()) {
       console.log('Using cached weather data');
       setLoading(false);
@@ -147,7 +162,7 @@ export function WeatherProvider({ children }) {
       const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=${unitSystem}`;
       const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=${unitSystem}`;
 
-      const fetchWithTimeout = (url, options = {}, timeout = 5000) => {
+      const fetchWithTimeout = async (url, timeout = 5000) => {
         return Promise.race([
           fetchWeatherData(url),
           new Promise((_, reject) => 
@@ -156,8 +171,6 @@ export function WeatherProvider({ children }) {
         ]);
       };
 
-      
-  
       const [current, forecast] = await Promise.all([
         fetchWithTimeout(weatherUrl),
         fetchWithTimeout(forecastUrl)
@@ -188,6 +201,7 @@ export function WeatherProvider({ children }) {
       ]);
 
       processWeatherData(current, forecast, cityName);
+      setLastFetchTime(Date.now());
     } catch (err) {
       setError(err.message || 'Failed to fetch weather for this city');
     } finally {
@@ -263,7 +277,8 @@ export function WeatherProvider({ children }) {
     toggleUnitSystem,
     setUnitSystem,
     setUseCurrentLocation,
-    setCity
+    setCity,
+    firstLoad
   };
 
   return (
