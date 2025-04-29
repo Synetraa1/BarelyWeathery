@@ -32,80 +32,6 @@ function WeatherApp() {
     const { tempUnit, speedUnit } = constants.getUnits(unitSystem);
     const { tempValue, convertWindSpeed } = constants;
 
-    const SunriseSunsetDisplay = ({ sunrise, sunset }) => {
-        return (
-          <div style={{ 
-            backgroundColor: "#fff", 
-            borderRadius: "16px", 
-            padding: "15px",
-            color: "black"
-          }}>
-            <Typography sx={{ marginBottom: "15px", fontSize: "18px" }}>Sunrise & Sunset</Typography>
-            
-            <div style={{ 
-              display: "flex", 
-              justifyContent: "space-between",
-              alignItems: "center", 
-              marginBottom: "10px" 
-            }}>
-              <div style={{ textAlign: "center", flex: 1 }}>
-              <div style={{ fontSize: "24px", marginBottom: "5px" }}>
-                <img src="/icons/sunrise.svg" alt="Clear day icon" /></div>
-                <div style={{ fontSize: "16px" }}>Sunrise</div>
-                <div style={{ fontSize: "18px" }}>{sunrise}</div>
-              </div>
-              
-              <div style={{ 
-                height: "2px", 
-                background: "linear-gradient(to right, #FFD700, #FF8C00)", 
-                flex: 2,
-                margin: "0 15px" 
-              }}></div>
-              
-              <div style={{ textAlign: "center", flex: 1 }}>
-                <div style={{ fontSize: "24px", marginBottom: "5px" }}><img src="/icons/sunset.svg" alt="Clear day icon" /></div>
-                <div style={{ fontSize: "16px" }}>Sunset</div>
-                <div style={{ fontSize: "18px" }}>{sunset}</div>
-              </div>
-            </div>
-            
-            <div style={{ textAlign: "center", marginTop: "10px", fontSize: "16px" }}>
-              Day Length: {calculateDayLength(sunrise, sunset)}
-            </div>
-          </div>
-        );
-      };
-      
-      const calculateDayLength = (sunrise, sunset) => {
-        // Parse times, handling AM/PM format
-        const sunriseHours = parseInt(sunrise.split(':')[0]);
-        const sunriseMinutes = parseInt(sunrise.split(':')[1].split(' ')[0]);
-        const sunriseAmPm = sunrise.includes('PM') ? 'PM' : 'AM';
-        
-        const sunsetHours = parseInt(sunset.split(':')[0]);
-        const sunsetMinutes = parseInt(sunset.split(':')[1].split(' ')[0]);
-        const sunsetAmPm = sunset.includes('PM') ? 'PM' : 'AM';
-        
-        let sunrise24Hours = sunriseHours;
-        if (sunriseAmPm === 'PM' && sunriseHours !== 12) sunrise24Hours += 12;
-        if (sunriseAmPm === 'AM' && sunriseHours === 12) sunrise24Hours = 0;
-        
-        let sunset24Hours = sunsetHours;
-        if (sunsetAmPm === 'PM' && sunsetHours !== 12) sunset24Hours += 12;
-        if (sunsetAmPm === 'AM' && sunsetHours === 12) sunset24Hours = 0;
-        
-        let dayHours = sunset24Hours - sunrise24Hours;
-        let dayMinutes = sunsetMinutes - sunriseMinutes;
-        
-        if (dayMinutes < 0) {
-          dayHours--;
-          dayMinutes += 60;
-        }
-        
-        return `${dayHours}h ${dayMinutes}m`;
-      };
-      
-
     // Show loading screen on first load
     if (loading && !weatherData) {
         return (
@@ -159,7 +85,7 @@ function WeatherApp() {
                                 mb: 2,
                             }}>
                                 <Card className="weather-card main-weather-card" sx={{
-                                    height: '102.5%',
+                                    height: '100%',
                                     backgroundColor: '#0034a4',
                                     borderRadius: '16px',
                                     position: 'relative',
@@ -237,7 +163,7 @@ function WeatherApp() {
                                 mx: 'auto',
                             }}>
                                 <Card className="weather-card details-card" sx={{ 
-                                    height: '100%', 
+                                    height: '97%', 
                                     backgroundColor: '#002471', 
                                     borderRadius: '16px',
                                     margin: { xs: '0 auto', md: 0 },
@@ -249,69 +175,34 @@ function WeatherApp() {
                                         color: '#FFF',
                                         p: { xs: 2, md: 3 },
                                     }}>
-                                        
                                         <Typography variant="h6" gutterBottom>Weather Details</Typography>
                                         <Box sx={{ 
-                                        display: 'flex', 
-                                        flexDirection: 'column',
-                                        width: '100%',
-                                        gap: 1, // Reduce this gap between rows from 2 to 1
-                                    }} className="equal-height-container"></Box>
-
-                                    <Grid container spacing={2} sx={{ display: 'flex' }}>
-                                    {/* Left side - Sunrise & Sunset Card taking 1/3 width */}
-                                    <Grid sx={{ width: { xs: '100%', md: '33%' } }}>
-                                        <Card sx={{
-                                        height: '100%',
-                                        backgroundColor: '#FFF',
-                                        borderRadius: '16px',
-                                        }}>
-                                        <CardContent>
-                                            
-                                            <SunriseSunsetDisplay 
-                                            sunrise={weatherData.formattedSunrise} 
-                                            sunset={weatherData.formattedSunset} 
-                                            />
-                                        </CardContent>
-                                        </Card>
-                                    </Grid>
-                                    
-                                    {/* Right side - Weather details in 3 rows of 2 cards */}
-                                    <Grid sx={{ width: { xs: '100%', md: '64%' }, display: 'flex', flexDirection: 'column' }}>
-                                        {[
-                                        [
-                                            ['Pressure', `${weatherData.main.pressure} hPa`],
-                                            ['Min Temp', `${tempValue(weatherData.main.temp_min, unitSystem)}${tempUnit}`]
-                                        ],
-                                        [
-                                            ['Max Temp', `${tempValue(weatherData.main.temp_max, unitSystem)}${tempUnit}`],
-                                            ['Cloud Cover', `${weatherData.clouds.all}%`]
-                                        ],
-                                        [
-                                            ['Visibility', `${unitSystem === 'metric' ? weatherData.visibility : (weatherData.visibility * 0.621371).toFixed(1)} ${unitSystem === 'metric' ? 'km' : 'mi'}`],
-                                            ['Precipitation (Past hour)', `${weatherData.rain && weatherData.rain['1h'] ? weatherData.rain['1h'] + ' mm' : 'None'}`]
-                                        ]
-                                        ].map((row, rowIndex) => (
-                                        <Grid sx={{ display: 'flex', mb: rowIndex < 2 ? 2 : 0 }} key={`row-${rowIndex}`}>
-                                            {row.map(([label, value], colIndex) => (
-                                            <Grid sx={{ width: '50%', pr: colIndex === 0 ? 1 : 0, pl: colIndex === 1 ? 1 : 0 }} key={label}>
-                                                <Card sx={{
-                                                height: '100%',
-                                                backgroundColor: '#FFF',
-                                                borderRadius: '16px',
+                                            display: 'flex', 
+                                            flexDirection: {xs:'column', md:'row', lg:'row'},
+                                            width: '100%',
+                                            gap: 2,
+                                        }} className="equal-height-container">
+                                            {[
+                                                ['Pressure', `${weatherData.main.pressure} hPa`],
+                                                ['Min Temp', `${tempValue(weatherData.main.temp_min, unitSystem)}${tempUnit}`],
+                                                ['Max Temp', `${tempValue(weatherData.main.temp_max, unitSystem)}${tempUnit}`]
+                                            ].map(([label, value]) => (
+                                                <Card key={label} className="weather-details-card" sx={{
+                                                    backgroundColor: '#FFF',
+                                                    color: '#000',
+                                                    borderRadius: '16px',
+                                                    width: {xs:'100%', md:'100%', lg:'20%'},
+                                                    mb: 1
                                                 }}>
-                                                <CardContent sx={{ textAlign: 'center', py: 1.5, '&:last-child': { pb: 1.5 } }}>
-                                                    <Typography variant="subtitle1" fontWeight="medium">{label}</Typography>
-                                                    <Typography variant="h6">{value}</Typography>
-                                                </CardContent>
+                                                    <CardContent className="card-content-center" sx={{ 
+                                                        '&:last-child': { pb: 2 }
+                                                    }}>
+                                                        <Typography variant="subtitle1" fontWeight="medium">{label}</Typography>
+                                                        <Typography variant="h6">{value}</Typography>
+                                                    </CardContent>
                                                 </Card>
-                                            </Grid>
                                             ))}
-                                        </Grid>
-                                        ))}
-                                    </Grid>
-                                    </Grid>
-
+                                        </Box>
                                         {/* Hourly Forecast Section */}
                                         <Box sx={{ width: '100%' }}>
                                         <Typography variant="h6" gutterBottom sx={{pt:1}}>Next 24 Hours</Typography>
@@ -436,8 +327,8 @@ function WeatherApp() {
   
                 {/* Show error or prompt if no weather data */}
                 {!weatherData && !loading && (
-                    <Typography textAlign="center" color="text.secondary">
-                        {error || "Search for a city to see weather information"}
+                    <Typography textAlign="center" color="#FFF">
+                        {error || "Searching for your location..."}
                     </Typography>
                 )}
 
