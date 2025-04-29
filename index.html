@@ -3,13 +3,36 @@
 <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/WeatherIcon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>BarelyWeathery, the Weather App</title>
     <link rel="stylesheet" href="/src/styles.css">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4039094909147349"
      crossorigin="anonymous"></script>
 </head>
 <body>
+    <script>
+        window.isRunningInWebView = navigator.userAgent.includes('BarelyWeatheryApp');
+        
+        if (window.isRunningInWebView) {
+          document.addEventListener('DOMContentLoaded', function() {
+            document.body.style.transform = 'translateZ(0)';
+            
+            const fixScrollContainers = function() {
+              const scrollContainers = document.querySelectorAll('.scrollable-container');
+              scrollContainers.forEach(container => {
+                container.style.webkitOverflowScrolling = 'touch';
+                container.style.overflowX = 'auto';
+                container.style.display = 'flex';
+                container.style.flexWrap = 'nowrap';
+              });
+            };
+            
+            fixScrollContainers();
+            setTimeout(fixScrollContainers, 1000);
+            setTimeout(fixScrollContainers, 3000);
+          });
+        }
+      </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
 </body>

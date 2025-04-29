@@ -15,80 +15,6 @@ import constants from './context/constants';
 import { WeatherProvider, useWeather } from './context/WeatherContext';
 import WeatherSummary from './components/weathersummary';
 
-const SunriseSunsetDisplay = ({ sunrise, sunset }) => {
-    return (
-      <div style={{ 
-        backgroundColor: "#fff", 
-        borderRadius: "16px", 
-        padding: "15px",
-        color: "black"
-      }}>
-        <Typography sx={{ marginBottom: "15px", fontSize: "18px" }}>Sunrise & Sunset</Typography>
-        
-        <div style={{ 
-          display: "flex", 
-          justifyContent: "space-between",
-          alignItems: "center", 
-          marginBottom: "10px" 
-        }}>
-          <div style={{ textAlign: "center", flex: 1 }}>
-          <div style={{ fontSize: "24px", marginBottom: "5px" }}>
-            <img src="/icons/sunrise.svg" alt="Clear day icon" /></div>
-            <div style={{ fontSize: "16px" }}>Sunrise</div>
-            <div style={{ fontSize: "18px" }}>{sunrise}</div>
-          </div>
-          
-          <div style={{ 
-            height: "2px", 
-            background: "linear-gradient(to right, #FFD700, #FF8C00)", 
-            flex: 2,
-            margin: "0 15px" 
-          }}></div>
-          
-          <div style={{ textAlign: "center", flex: 1 }}>
-            <div style={{ fontSize: "24px", marginBottom: "5px" }}><img src="/icons/sunset.svg" alt="Clear day icon" /></div>
-            <div style={{ fontSize: "16px" }}>Sunset</div>
-            <div style={{ fontSize: "18px" }}>{sunset}</div>
-          </div>
-        </div>
-        
-        <div style={{ textAlign: "center", marginTop: "10px", fontSize: "16px" }}>
-          Day Length: {calculateDayLength(sunrise, sunset)}
-        </div>
-      </div>
-    );
-  };
-  
-  const calculateDayLength = (sunrise, sunset) => {
-    // Parse times, handling AM/PM format
-    const sunriseHours = parseInt(sunrise.split(':')[0]);
-    const sunriseMinutes = parseInt(sunrise.split(':')[1].split(' ')[0]);
-    const sunriseAmPm = sunrise.includes('PM') ? 'PM' : 'AM';
-    
-    const sunsetHours = parseInt(sunset.split(':')[0]);
-    const sunsetMinutes = parseInt(sunset.split(':')[1].split(' ')[0]);
-    const sunsetAmPm = sunset.includes('PM') ? 'PM' : 'AM';
-    
-    let sunrise24Hours = sunriseHours;
-    if (sunriseAmPm === 'PM' && sunriseHours !== 12) sunrise24Hours += 12;
-    if (sunriseAmPm === 'AM' && sunriseHours === 12) sunrise24Hours = 0;
-    
-    let sunset24Hours = sunsetHours;
-    if (sunsetAmPm === 'PM' && sunsetHours !== 12) sunset24Hours += 12;
-    if (sunsetAmPm === 'AM' && sunsetHours === 12) sunset24Hours = 0;
-    
-    let dayHours = sunset24Hours - sunrise24Hours;
-    let dayMinutes = sunsetMinutes - sunriseMinutes;
-    
-    if (dayMinutes < 0) {
-      dayHours--;
-      dayMinutes += 60;
-    }
-    
-    return `${dayHours}h ${dayMinutes}m`;
-  };
-  
-
 
 // Main content component that uses the weather context
 function WeatherApp() {
@@ -106,6 +32,79 @@ function WeatherApp() {
     const { tempUnit, speedUnit } = constants.getUnits(unitSystem);
     const { tempValue, convertWindSpeed } = constants;
 
+    const SunriseSunsetDisplay = ({ sunrise, sunset }) => {
+        return (
+          <div style={{ 
+            backgroundColor: "#fff", 
+            borderRadius: "16px", 
+            padding: "15px",
+            color: "black"
+          }}>
+            <Typography sx={{ marginBottom: "15px", fontSize: "18px" }}>Sunrise & Sunset</Typography>
+            
+            <div style={{ 
+              display: "flex", 
+              justifyContent: "space-between",
+              alignItems: "center", 
+              marginBottom: "10px" 
+            }}>
+              <div style={{ textAlign: "center", flex: 1 }}>
+              <div style={{ fontSize: "24px", marginBottom: "5px" }}>
+                <img src="/icons/sunrise.svg" alt="Clear day icon" /></div>
+                <div style={{ fontSize: "16px" }}>Sunrise</div>
+                <div style={{ fontSize: "18px" }}>{sunrise}</div>
+              </div>
+              
+              <div style={{ 
+                height: "2px", 
+                background: "linear-gradient(to right, #FFD700, #FF8C00)", 
+                flex: 2,
+                margin: "0 15px" 
+              }}></div>
+              
+              <div style={{ textAlign: "center", flex: 1 }}>
+                <div style={{ fontSize: "24px", marginBottom: "5px" }}><img src="/icons/sunset.svg" alt="Clear day icon" /></div>
+                <div style={{ fontSize: "16px" }}>Sunset</div>
+                <div style={{ fontSize: "18px" }}>{sunset}</div>
+              </div>
+            </div>
+            
+            <div style={{ textAlign: "center", marginTop: "10px", fontSize: "16px" }}>
+              Day Length: {calculateDayLength(sunrise, sunset)}
+            </div>
+          </div>
+        );
+      };
+      
+      const calculateDayLength = (sunrise, sunset) => {
+        // Parse times, handling AM/PM format
+        const sunriseHours = parseInt(sunrise.split(':')[0]);
+        const sunriseMinutes = parseInt(sunrise.split(':')[1].split(' ')[0]);
+        const sunriseAmPm = sunrise.includes('PM') ? 'PM' : 'AM';
+        
+        const sunsetHours = parseInt(sunset.split(':')[0]);
+        const sunsetMinutes = parseInt(sunset.split(':')[1].split(' ')[0]);
+        const sunsetAmPm = sunset.includes('PM') ? 'PM' : 'AM';
+        
+        let sunrise24Hours = sunriseHours;
+        if (sunriseAmPm === 'PM' && sunriseHours !== 12) sunrise24Hours += 12;
+        if (sunriseAmPm === 'AM' && sunriseHours === 12) sunrise24Hours = 0;
+        
+        let sunset24Hours = sunsetHours;
+        if (sunsetAmPm === 'PM' && sunsetHours !== 12) sunset24Hours += 12;
+        if (sunsetAmPm === 'AM' && sunsetHours === 12) sunset24Hours = 0;
+        
+        let dayHours = sunset24Hours - sunrise24Hours;
+        let dayMinutes = sunsetMinutes - sunriseMinutes;
+        
+        if (dayMinutes < 0) {
+          dayHours--;
+          dayMinutes += 60;
+        }
+        
+        return `${dayHours}h ${dayMinutes}m`;
+      };
+      
 
     // Show loading screen on first load
     if (loading && !weatherData) {
