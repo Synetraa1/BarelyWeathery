@@ -5,6 +5,8 @@ const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
 // Create the context
 const WeatherContext = createContext();
 
+const CACHE_DURATION = 15 * 60 * 1000;
+
 export function WeatherProvider({ children }) {
   const [unitSystem, setUnitSystem] = useState('metric');
   const [weatherData, setWeatherData] = useState(null);
@@ -15,6 +17,8 @@ export function WeatherProvider({ children }) {
   const [error, setError] = useState(null);
   const [useCurrentLocation, setUseCurrentLocation] = useState(true);
   const toggleInProgress = useRef(false);
+  const [lastFetchTime, setLastFetchTime] = useState(null);
+
 
   // Utility functions for temperature and wind speed conversion
   const convertTemperature = (temp, toUnit) => {
@@ -66,6 +70,12 @@ export function WeatherProvider({ children }) {
     if (!response.ok) throw new Error('Weather data unavailable');
     return await response.json();
   }, []);
+
+  const isCacheValid = useCallback(() => {
+    if (!lastFetchTime || !weatherData) return false;
+    const now = Date.now();
+    return now - lastFetchTime < CACHE_DURATION;
+  }, [lastFetchTime, weatherData]);
 
   // Helper function for weather descriptions
   const getWeatherDescription = (temp, condition, windSpeed, humidity, isDay) => {
@@ -123,19 +133,38 @@ export function WeatherProvider({ children }) {
 
   // Weather fetching functions
   const fetchWeatherByCoords = useCallback(async (lat, lon) => {
+
+    if (isCacheValid()) {
+      console.log('Using cached weather data');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
       
       const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=${unitSystem}`;
       const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=${unitSystem}`;
+
+      const fetchWithTimeout = (url, options = {}, timeout = 5000) => {
+        return Promise.race([
+          fetchWeatherData(url),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Request timed out')), timeout)
+          )
+        ]);
+      };
+
+      
   
       const [current, forecast] = await Promise.all([
-        fetchWeatherData(weatherUrl),
-        fetchWeatherData(forecastUrl)
+        fetchWithTimeout(weatherUrl),
+        fetchWithTimeout(forecastUrl)
       ]);
-
+  
       processWeatherData(current, forecast);
+      setLastFetchTime(Date.now());
     } catch (err) {
       setError(err.message);
       setUseCurrentLocation(false);
@@ -143,7 +172,7 @@ export function WeatherProvider({ children }) {
       setLoading(false);
       toggleInProgress.current = false;
     }
-  }, [unitSystem, fetchWeatherData, processWeatherData]);
+  }, [unitSystem, fetchWeatherData, processWeatherData, isCacheValid]);
 
   const fetchWeatherByCity = useCallback(async (cityName) => {
     try {
