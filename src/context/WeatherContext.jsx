@@ -15,6 +15,10 @@ export function WeatherProvider({ children }) {
   const [error, setError] = useState(null);
   const [useCurrentLocation, setUseCurrentLocation] = useState(true);
   const toggleInProgress = useRef(false);
+  
+  // Store original API response data for proper unit conversion
+  const [originalWeatherData, setOriginalWeatherData] = useState(null);
+  const [originalForecastData, setOriginalForecastData] = useState(null);
 
   // Utility functions for temperature and wind speed conversion
   const convertTemperature = (temp, toUnit) => {
@@ -34,6 +38,16 @@ export function WeatherProvider({ children }) {
     } else {
       // Convert mph to m/s
       return speed / 2.237;
+    }
+  };
+  
+  const convertVisibility = (visibilityInMeters, toUnit) => {
+    if (toUnit === 'imperial') {
+      // Convert meters to miles
+      return +((visibilityInMeters / 1000) * 0.621371).toFixed(1);
+    } else {
+      // Convert meters to kilometers
+      return +(visibilityInMeters / 1000).toFixed(1);
     }
   };
   
@@ -67,19 +81,46 @@ export function WeatherProvider({ children }) {
     return await response.json();
   }, []);
 
+  // Function to get sunrise and sunset data
+  const processSunriseSunset = useCallback((data) => {
+    const sunriseTimestamp = data.sys.sunrise;
+    const sunsetTimestamp = data.sys.sunset;
+    
+    const sunriseTime = new Date(sunriseTimestamp * 1000);
+    const sunsetTime = new Date(sunsetTimestamp * 1000);
+    
+    return {
+      ...data,
+      formattedSunrise: sunriseTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      formattedSunset: sunsetTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+  }, []);
+
   // Helper function for weather descriptions
-  const getWeatherDescription = (temp, condition, windSpeed, humidity, isDay) => {
-    // This is a placeholder - implement your weather description logic here
-    // You can replace this with your actual describeWeather function from utils
+  const getWeatherDescription = (temp, condition, windSpeed, humidity, isDay, visibility) => {
     return `Weather condition: ${condition}, Temperature: ${temp}°${unitSystem === 'metric' ? 'C' : 'F'}`;
   };
 
   // Common data processing function with unit conversion
   const processWeatherData = useCallback((current, forecastData, cityName, fromUnit = unitSystem, toUnit = unitSystem) => {
-    // Only convert if units are different
+    // Clone the data to avoid mutating the original objects
     let processedCurrent = { ...current };
     let processedForecast = { ...forecastData };
     
+    
+    // Add sunrise and sunset data
+    processedCurrent = processSunriseSunset(processedCurrent);
+
+    // Convert visibility
+    processedCurrent.visibility = convertVisibility(processedCurrent.visibility, toUnit);
+    
+    // Process forecast visibility
+    processedForecast.list = processedForecast.list.map(item => ({
+      ...item,
+      visibility: convertVisibility(item.visibility, toUnit)
+    }));
+
+    // Additional unit conversions if changing unit systems
     if (fromUnit !== toUnit) {
       // Convert current weather data
       processedCurrent.main.temp = convertTemperature(processedCurrent.main.temp, toUnit);
@@ -87,7 +128,7 @@ export function WeatherProvider({ children }) {
       processedCurrent.main.temp_min = convertTemperature(processedCurrent.main.temp_min, toUnit);
       processedCurrent.main.temp_max = convertTemperature(processedCurrent.main.temp_max, toUnit);
       processedCurrent.wind.speed = convertWindSpeed(processedCurrent.wind.speed, toUnit);
-      
+
       // Convert forecast data
       processedForecast.list = processedForecast.list.map(item => ({
         ...item,
@@ -135,6 +176,10 @@ export function WeatherProvider({ children }) {
         fetchWeatherData(forecastUrl)
       ]);
 
+      // Store original API responses
+      setOriginalWeatherData(current);
+      setOriginalForecastData(forecast);
+
       processWeatherData(current, forecast);
     } catch (err) {
       setError(err.message);
@@ -157,6 +202,10 @@ export function WeatherProvider({ children }) {
         fetchWeatherData(weatherUrl),
         fetchWeatherData(forecastUrl)
       ]);
+
+      // Store original API responses
+      setOriginalWeatherData(current);
+      setOriginalForecastData(forecast);
 
       processWeatherData(current, forecast, cityName);
     } catch (err) {
@@ -182,13 +231,13 @@ export function WeatherProvider({ children }) {
     // Create the new unit system value
     const newUnitSystem = unitSystem === 'metric' ? 'imperial' : 'metric';
     
-    // Important: We'll now use the current data and convert it rather than fetching new data
-    if (weatherData && forecast.length > 0 && hourlyForecast.length > 0) {
+    // Important: We'll now use the ORIGINAL API data to convert properly
+    if (weatherData && originalWeatherData && originalForecastData) {
       // Update state
       setUnitSystem(newUnitSystem);
       
-      // Use the current data and convert it
-      processWeatherData(weatherData, { list: [...forecast, ...hourlyForecast] }, city, unitSystem, newUnitSystem);
+      // Use the original API data for conversion
+      processWeatherData(originalWeatherData, originalForecastData, city, unitSystem, newUnitSystem);
       
       setTimeout(() => {
         toggleInProgress.current = false;
@@ -218,7 +267,7 @@ export function WeatherProvider({ children }) {
         setLoading(false);
       }
     }
-  }, [city, weatherData, forecast, hourlyForecast, unitSystem, processWeatherData, fetchWeatherByCity, fetchWeatherByCoords, useCurrentLocation]);
+  }, [city, weatherData, originalWeatherData, originalForecastData, unitSystem, processWeatherData, fetchWeatherByCity, fetchWeatherByCoords, useCurrentLocation]);
 
   const value = {
     unitSystem,
